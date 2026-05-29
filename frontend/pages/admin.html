@@ -51,12 +51,12 @@
         <div class="position-sticky">
           <ul class="nav flex-column gap-1 px-2">
             <li class="nav-item">
-              <a class="nav-link nav-link-custom active d-flex align-items-center" href="#">
+              <a class="nav-link nav-link-custom active d-flex align-items-center" href="#" id="navUsuarios">
                 <i class="bi bi-people me-2"></i> Usuários
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link nav-link-custom d-flex align-items-center" href="#">
+              <a class="nav-link nav-link-custom d-flex align-items-center" href="#" id="navAcervo">
                 <i class="bi bi-journal-text me-2"></i> Acervo
               </a>
             </li>
@@ -93,12 +93,12 @@
         <div class="offcanvas-body py-4">
           <ul class="nav flex-column gap-1">
             <li class="nav-item">
-              <a class="nav-link nav-link-custom active d-flex align-items-center" href="#">
+              <a class="nav-link nav-link-custom active d-flex align-items-center" href="#" id="navUsuariosMobile">
                 <i class="bi bi-people me-2"></i> Usuários
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link nav-link-custom d-flex align-items-center" href="#">
+              <a class="nav-link nav-link-custom d-flex align-items-center" href="#" id="navAcervoMobile">
                 <i class="bi bi-journal-text me-2"></i> Acervo
               </a>
             </li>
@@ -128,63 +128,200 @@
 
       <!-- Main Content -->
       <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
-        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-4">
-          <h1 class="h3 fw-bold text-dark mb-0">Gestão de usuários</h1>
-          <button class="btn btn-primary-custom mt-3 mt-md-0" data-bs-toggle="modal" data-bs-target="#userModal" id="btnNovoUsuario">
-            <i class="bi bi-plus-lg me-1"></i> Novo usuário
-          </button>
+        
+        <!-- SECTION: USUÁRIOS -->
+        <div id="sectionUsuarios">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-4">
+            <h1 class="h3 fw-bold text-dark mb-0">Gestão de usuários</h1>
+            <button class="btn btn-primary-custom mt-3 mt-md-0" data-bs-toggle="modal" data-bs-target="#userModal" id="btnNovoUsuario">
+              <i class="bi bi-plus-lg me-1"></i> Novo usuário
+            </button>
+          </div>
+
+          <!-- Stats Cards -->
+          <div class="row g-3 mb-4">
+            <div class="col-12 col-sm-4">
+              <div class="stat-card">
+                <div class="fs-2 fw-bold text-dark" id="statTotal">0</div>
+                <div class="text-muted small">Total de leitores</div>
+              </div>
+            </div>
+            <div class="col-12 col-sm-4">
+              <div class="stat-card">
+                <div class="fs-2 fw-bold text-dark" id="statAtivos">0</div>
+                <div class="text-muted small">Ativos este mês</div>
+              </div>
+            </div>
+            <div class="col-12 col-sm-4">
+              <div class="stat-card">
+                <div class="fs-2 fw-bold text-dark" id="statNovos">0</div>
+                <div class="text-muted small">Novos hoje</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Search and Table -->
+          <div class="bg-white rounded-3 border p-0 overflow-hidden">
+            <div class="p-3 border-bottom bg-light">
+              <div class="input-group" style="max-width: 400px;">
+                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" class="form-control border-start-0 ps-0" id="searchInput" placeholder="Buscar por nome ou e-mail...">
+              </div>
+            </div>
+            
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-muted small">
+                  <tr>
+                    <th class="fw-semibold py-3 ps-4">Nome</th>
+                    <th class="fw-semibold py-3">E-mail</th>
+                    <th class="fw-semibold py-3">Status</th>
+                    <th class="fw-semibold py-3 text-end pe-4">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                  <!-- Rows will be populated by JS -->
+                  <tr>
+                    <td colspan="4" class="text-center py-4 text-muted">Carregando usuários...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
-        <!-- Stats Cards -->
-        <div class="row g-3 mb-4">
-          <div class="col-12 col-sm-4">
-            <div class="stat-card">
-              <div class="fs-2 fw-bold text-dark" id="statTotal">0</div>
-              <div class="text-muted small">Total de leitores</div>
-            </div>
+        <!-- SECTION: ACERVO -->
+        <div id="sectionAcervo" class="d-none">
+          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-4">
+            <h1 class="h3 fw-bold text-dark mb-0">Gestão de acervo</h1>
+            <button class="btn btn-primary-custom mt-3 mt-md-0" id="btnNovoLivro">
+              <i class="bi bi-plus-lg me-1"></i> Novo livro
+            </button>
           </div>
-          <div class="col-12 col-sm-4">
-            <div class="stat-card">
-              <div class="fs-2 fw-bold text-dark" id="statAtivos">0</div>
-              <div class="text-muted small">Ativos este mês</div>
+
+          <!-- Search and Table for Books -->
+          <div class="bg-white rounded-3 border p-0 overflow-hidden">
+            <div class="p-3 border-bottom bg-light">
+              <div class="input-group" style="max-width: 400px;">
+                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" class="form-control border-start-0 ps-0" id="searchBookInput" placeholder="Buscar por título, autor ou ISBN...">
+              </div>
             </div>
-          </div>
-          <div class="col-12 col-sm-4">
-            <div class="stat-card">
-              <div class="fs-2 fw-bold text-dark" id="statNovos">0</div>
-              <div class="text-muted small">Novos hoje</div>
+            
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead class="table-light text-muted small">
+                  <tr>
+                    <th class="fw-semibold py-3 ps-4">Título</th>
+                    <th class="fw-semibold py-3">Autor</th>
+                    <th class="fw-semibold py-3">Gênero</th>
+                    <th class="fw-semibold py-3">Status</th>
+                    <th class="fw-semibold py-3 text-end pe-4">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="booksTableBody">
+                  <!-- Rows will be populated by JS -->
+                  <tr>
+                    <td colspan="5" class="text-center py-4 text-muted">Carregando acervo...</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
 
-        <!-- Search and Table -->
-        <div class="bg-white rounded-3 border p-0 overflow-hidden">
-          <div class="p-3 border-bottom bg-light">
-            <div class="input-group" style="max-width: 400px;">
-              <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-              <input type="text" class="form-control border-start-0 ps-0" id="searchInput" placeholder="Buscar por nome ou e-mail...">
+        <!-- SECTION: ADMIN LIVRO (CREATE/EDIT) -->
+        <div id="sectionAdminLivro" class="d-none">
+          <div class="bg-white rounded-4 shadow-sm border p-4 p-md-5" style="max-width: 800px; margin: 0 auto;">
+            <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+              <h2 class="fw-bold text-dark mb-0" id="bookPageTitle">Cadastrar novo livro</h2>
+              <span class="badge bg-light text-dark border rounded-pill px-3 py-2 fw-normal" id="bookPageSubtitle">Preencha os campos e salve</span>
             </div>
-          </div>
-          
-          <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-              <thead class="table-light text-muted small">
-                <tr>
-                  <th class="fw-semibold py-3 ps-4">Nome</th>
-                  <th class="fw-semibold py-3">E-mail</th>
-                  <th class="fw-semibold py-3">Status</th>
-                  <th class="fw-semibold py-3 text-end pe-4">Ações</th>
-                </tr>
-              </thead>
-              <tbody id="usersTableBody">
-                <!-- Rows will be populated by JS -->
-                <tr>
-                  <td colspan="4" class="text-center py-4 text-muted">Carregando usuários...</td>
-                </tr>
-              </tbody>
-            </table>
+
+            <div id="bookAlertMessage" class="alert d-none" role="alert"></div>
+
+            <form id="bookForm">
+              <input type="hidden" id="bookId">
+              
+              <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                  <label class="form-label small fw-semibold">Título *</label>
+                  <input type="text" class="form-control bg-light" id="titulo" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-semibold">Autor *</label>
+                  <input type="text" class="form-control bg-light" id="autor" required>
+                </div>
+                
+                <div class="col-md-6">
+                  <label class="form-label small fw-semibold">ISBN *</label>
+                  <input type="text" class="form-control bg-light" id="isbn" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-semibold">Gênero *</label>
+                  <select class="form-select bg-light" id="genero" required>
+                    <option value="" selected disabled>Selecione...</option>
+                    <option value="Literatura">Literatura</option>
+                    <option value="Ficção científica">Ficção científica</option>
+                    <option value="Filosofia">Filosofia</option>
+                    <option value="Romance">Romance</option>
+                    <option value="Poesia">Poesia</option>
+                    <option value="Biografia">Biografia</option>
+                    <option value="História">História</option>
+                    <option value="Técnico">Técnico</option>
+                  </select>
+                </div>
+                
+                <div class="col-md-6">
+                  <label class="form-label small fw-semibold">Ano de publicação *</label>
+                  <input type="number" class="form-control bg-light" id="anoPublicacao" required min="1000" max="2100">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-semibold">Nº de exemplares *</label>
+                  <input type="number" class="form-control bg-light" id="numeroExemplares" required min="0" value="1">
+                </div>
+                
+                <div class="col-md-6">
+                  <label class="form-label small fw-semibold">Idioma *</label>
+                  <select class="form-select bg-light" id="idioma" required>
+                    <option value="Português" selected>Português</option>
+                    <option value="Inglês">Inglês</option>
+                    <option value="Espanhol">Espanhol</option>
+                    <option value="Francês">Francês</option>
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label small fw-semibold">Páginas *</label>
+                  <input type="number" class="form-control bg-light" id="paginas" required min="1">
+                </div>
+                
+                <div class="col-12">
+                  <label class="form-label small fw-semibold">Sinopse *</label>
+                  <textarea class="form-control bg-light" id="sinopse" rows="4" required></textarea>
+                </div>
+                
+                <div class="col-12">
+                  <label class="form-label small fw-semibold">URL da capa (opcional)</label>
+                  <input type="url" class="form-control bg-light" id="urlCapa" placeholder="https://example.com/capa.jpg">
+                  <div class="form-text small">Link direto para imagem JPG ou PNG</div>
+                </div>
+              </div>
+              
+              <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                <button type="button" class="btn btn-outline-danger d-none" id="deleteBookBtn">
+                  <i class="bi bi-trash me-1"></i> Excluir
+                </button>
+                <div class="ms-auto">
+                  <button type="button" class="btn btn-light me-2" id="cancelBookBtn">Cancelar</button>
+                  <button type="submit" class="btn btn-primary-custom px-4" id="saveBookBtn">
+                    <i class="bi bi-save me-1"></i> Salvar livro
+                  </button>
+                </div>
+              </div>
+            </form>
           </div>
         </div>
+
       </main>
     </div>
   </div>

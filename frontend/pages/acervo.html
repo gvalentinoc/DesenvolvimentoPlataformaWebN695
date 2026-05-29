@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BiblioTeca - Acervo</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="../css/books.css">
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3">
+    <div class="container">
+      <a class="navbar-brand fw-bold text-white d-flex align-items-center" href="index.html">
+        <i class="bi bi-book me-2 text-primary-custom"></i> Biblio<span class="text-primary-custom">Teca</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav mx-auto">
+          <li class="nav-item"><a class="nav-link active" href="acervo.html">Acervo</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Empréstimos</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Minha conta</a></li>
+        </ul>
+        <div class="d-flex gap-2 mt-3 mt-lg-0">
+          <a href="admin.html" class="btn btn-primary-custom px-4 d-none" id="adminBtn">Admin</a>
+          <a href="login.html" class="btn btn-outline-light px-4" id="loginBtnNav">Entrar</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container py-4 flex-grow-1">
+    <!-- Header & View Toggle -->
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+      <h2 class="fw-bold text-dark mb-0">Acervo de livros</h2>
+      <div class="btn-group" role="group">
+        <input type="radio" class="btn-check" name="viewToggle" id="btnList" autocomplete="off">
+        <label class="btn btn-outline-secondary bg-white text-dark" for="btnList"><i class="bi bi-list-ul me-1"></i> Lista</label>
+
+        <input type="radio" class="btn-check" name="viewToggle" id="btnGrid" autocomplete="off" checked>
+        <label class="btn btn-outline-secondary bg-light text-primary-custom border-primary-custom" for="btnGrid"><i class="bi bi-grid-3x3-gap-fill me-1"></i> Grid</label>
+      </div>
+    </div>
+
+    <!-- Search & Filters Bar -->
+    <div class="bg-white p-3 rounded-3 border mb-4">
+      <div class="d-flex gap-2 mb-3">
+        <div class="input-group flex-grow-1">
+          <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+          <input type="text" class="form-control bg-light border-start-0 ps-0" id="searchInput" placeholder="Buscar por título, autor ou ISBN...">
+        </div>
+        <button class="btn btn-outline-secondary bg-light text-dark" type="button" data-bs-toggle="collapse" data-bs-target="#advancedFilters">
+          <i class="bi bi-sliders me-1"></i> Filtros
+        </button>
+      </div>
+
+      <!-- Quick Filter Chips -->
+      <div class="d-flex flex-wrap gap-2" id="quickFilters">
+        <button class="filter-chip active" data-filter="all">Todos</button>
+        <button class="filter-chip" data-filter="disponivel=true">Disponíveis</button>
+        <button class="filter-chip" data-filter="genero=Literatura">Literatura</button>
+        <button class="filter-chip" data-filter="genero=Ficção científica">Ficção científica</button>
+        <button class="filter-chip" data-filter="genero=Filosofia">Filosofia</button>
+        <button class="filter-chip" data-filter="genero=Romance">Romance</button>
+      </div>
+
+      <!-- Advanced Filters Collapse (Tela 3) -->
+      <div class="collapse mt-4 pt-3 border-top" id="advancedFilters">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0">Filtros</h5>
+          <button class="btn btn-sm btn-primary-custom rounded-pill px-3" id="applyFiltersBtn">Aplicar filtros</button>
+        </div>
+        
+        <div class="row g-4">
+          <div class="col-md-6">
+            <h6 class="small fw-semibold text-dark mb-2">Gênero</h6>
+            <div class="d-flex flex-wrap gap-2" id="filterGenero">
+              <button class="filter-chip" data-value="Literatura">Literatura</button>
+              <button class="filter-chip" data-value="Filosofia">Filosofia</button>
+              <button class="filter-chip" data-value="Ficção">Ficção</button>
+              <button class="filter-chip" data-value="Romance">Romance</button>
+              <button class="filter-chip" data-value="Poesia">Poesia</button>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <h6 class="small fw-semibold text-dark mb-2">Disponibilidade</h6>
+            <div class="d-flex flex-wrap gap-2" id="filterDisponibilidade">
+              <button class="filter-chip" data-value="true">Disponível</button>
+              <button class="filter-chip" data-value="false">Emprestado</button>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <h6 class="small fw-semibold text-dark mb-2">Período</h6>
+            <div class="d-flex flex-wrap gap-2" id="filterPeriodo">
+              <button class="filter-chip" data-value="1800-1899">Séc. XIX</button>
+              <button class="filter-chip" data-value="1900-1999">Séc. XX</button>
+              <button class="filter-chip" data-value="2000-2099">Séc. XXI</button>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <h6 class="small fw-semibold text-dark mb-2">Idioma</h6>
+            <div class="d-flex flex-wrap gap-2" id="filterIdioma">
+              <button class="filter-chip" data-value="Português">Português</button>
+              <button class="filter-chip" data-value="Inglês">Inglês</button>
+              <button class="filter-chip" data-value="Espanhol">Espanhol</button>
+            </div>
+          </div>
+          <div class="col-12">
+            <h6 class="small fw-semibold text-dark mb-2">Ordenar por</h6>
+            <div class="d-flex flex-wrap gap-2" id="filterOrdem">
+              <button class="filter-chip" data-value="titulo">Título A-Z</button>
+              <button class="filter-chip" data-value="recente">Mais recente</button>
+              <button class="filter-chip" data-value="emprestado">Mais emprestado</button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="d-flex align-items-center gap-3 mt-4">
+          <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" id="clearFiltersBtn">Limpar filtros</button>
+          <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill" id="resultsCountBadge">0 resultados encontrados</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Books Grid -->
+    <div class="row g-4" id="booksGrid">
+      <!-- Populated by JS -->
+      <div class="col-12 text-center py-5">
+        <div class="spinner-border text-primary-custom" role="status">
+          <span class="visually-hidden">Carregando...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer & Pagination -->
+    <div class="d-flex justify-content-between align-items-center mt-5 flex-wrap gap-3">
+      <span class="text-muted small" id="totalBooksText">0 livros encontrados</span>
+      <nav aria-label="Navegação de páginas">
+        <ul class="pagination mb-0 gap-1" id="pagination">
+          <!-- Populated by JS -->
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-white border-top py-4 mt-auto">
+    <div class="container text-center">
+      <p class="text-muted small mb-0">
+        &copy; 2025 BiblioTeca · Todos os direitos reservados · <a href="#" class="text-primary-custom text-decoration-none">Política de privacidade</a>
+      </p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="../js/acervo.js"></script>
+</body>
+</html>
