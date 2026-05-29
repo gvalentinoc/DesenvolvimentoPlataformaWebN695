@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BiblioTeca - Landing Page</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="bg-white d-flex flex-column min-vh-100">
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom py-3">
+    <div class="container">
+      <a class="navbar-brand fw-bold text-dark d-flex align-items-center" href="index.html">
+        <i class="bi bi-book me-2 text-primary-custom"></i> BiblioTeca
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav mx-auto">
+          <li class="nav-item"><a class="nav-link" href="#">Acervo</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Sobre</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Contato</a></li>
+        </ul>
+        <div class="d-flex gap-2 mt-3 mt-lg-0">
+          <a href="login.html" class="btn btn-outline-primary-custom px-4">Entrar</a>
+          <a href="cadastro.html" class="btn btn-primary-custom px-4">Cadastrar</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero-section text-center flex-grow-1 d-flex align-items-center">
+    <div class="container">
+      <p class="text-primary-custom fw-semibold mb-2">Sistema de gestão de biblioteca</p>
+      <h1 class="display-4 fw-bold text-dark mb-3 mx-auto" style="max-width: 800px;">
+        Organize, acesse e gerencie seu acervo com facilidade
+      </h1>
+      <p class="lead text-muted mb-5">Cadastre-se gratuitamente e explore milhares de títulos disponíveis.</p>
+      <div class="d-flex justify-content-center gap-3 flex-wrap">
+        <a href="cadastro.html" class="btn btn-primary-custom btn-lg px-4">Começar agora</a>
+        <a href="#" class="btn btn-outline-primary-custom btn-lg px-4">Ver acervo</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="py-5 bg-white">
+    <div class="container py-4">
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="feature-card text-center bg-light">
+            <i class="bi bi-book fs-1 text-primary-custom mb-3"></i>
+            <h4 class="h5 fw-bold">Acervo digital</h4>
+            <p class="text-muted mb-0">Milhares de títulos catalogados</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="feature-card text-center bg-light">
+            <i class="bi bi-search fs-1 text-primary-custom mb-3"></i>
+            <h4 class="h5 fw-bold">Busca avançada</h4>
+            <p class="text-muted mb-0">Por título, autor ou gênero</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="feature-card text-center bg-light">
+            <i class="bi bi-person-check fs-1 text-primary-custom mb-3"></i>
+            <h4 class="h5 fw-bold">Área do leitor</h4>
+            <p class="text-muted mb-0">Gerencie seus empréstimos</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-white border-top py-4 mt-auto">
+    <div class="container text-center">
+      <p class="text-muted small mb-0">
+        &copy; 2025 BiblioTeca · Todos os direitos reservados · <a href="#" class="text-primary-custom text-decoration-none">Política de privacidade</a>
+      </p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

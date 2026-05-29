@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BiblioTeca - Cadastro</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="d-flex flex-column min-vh-100">
+  <!-- Navbar Minimal -->
+  <nav class="navbar navbar-light bg-white border-bottom py-3">
+    <div class="container">
+      <a class="navbar-brand fw-bold text-dark d-flex align-items-center" href="index.html">
+        <i class="bi bi-book me-2 text-primary-custom"></i> BiblioTeca
+      </a>
+    </div>
+  </nav>
+
+  <div class="container flex-grow-1 d-flex align-items-center justify-content-center py-4">
+    <div class="auth-card" style="max-width: 500px;">
+      <div class="text-center mb-4">
+        <i class="bi bi-person-plus fs-1 text-primary-custom"></i>
+        <h2 class="fw-bold mt-2">Criar conta de leitor</h2>
+        <p class="text-muted">Preencha os dados abaixo</p>
+      </div>
+
+      <div id="alertMessage" class="alert d-none" role="alert"></div>
+
+      <form id="registerForm">
+        <div class="row mb-3">
+          <div class="col-md-6 mb-3 mb-md-0">
+            <label for="nome" class="form-label">Nome</label>
+            <input type="text" class="form-control bg-light" id="nome" placeholder="Ana" required>
+          </div>
+          <div class="col-md-6">
+            <label for="sobrenome" class="form-label">Sobrenome</label>
+            <input type="text" class="form-control bg-light" id="sobrenome" placeholder="Silva" required>
+          </div>
+        </div>
+        
+        <div class="mb-3">
+          <label for="email" class="form-label">E-mail</label>
+          <input type="email" class="form-control bg-light" id="email" placeholder="seu@email.com" required>
+        </div>
+        
+        <div class="mb-3">
+          <label for="senha" class="form-label">Senha</label>
+          <div class="input-group">
+            <input type="password" class="form-control bg-light border-end-0" id="senha" placeholder="••••••••" required pattern="^(?=.*[A-Z])(?=.*\d).{8,}$">
+            <span class="input-group-text bg-light cursor-pointer" id="togglePassword" style="cursor: pointer;">
+              <i class="bi bi-eye"></i>
+            </span>
+          </div>
+          <div class="form-text text-muted small">Mínimo 8 caracteres, 1 número e 1 letra maiúscula</div>
+        </div>
+        
+        <div class="mb-3">
+          <label for="confirmarSenha" class="form-label">Confirmar senha</label>
+          <div class="input-group">
+            <input type="password" class="form-control bg-light border-end-0" id="confirmarSenha" placeholder="••••••••" required>
+            <span class="input-group-text bg-light cursor-pointer" id="toggleConfirmPassword" style="cursor: pointer;">
+              <i class="bi bi-eye"></i>
+            </span>
+          </div>
+          <div class="invalid-feedback">As senhas não coincidem.</div>
+        </div>
+        
+        <div class="mb-4 form-check">
+          <input type="checkbox" class="form-check-input" id="lgpdConsent" required>
+          <label class="form-check-label small text-muted" for="lgpdConsent">
+            Li e concordo com a <a href="#" class="text-primary-custom text-decoration-none">Política de Privacidade</a> e com o tratamento dos meus dados conforme a LGPD.
+          </label>
+        </div>
+        
+        <button type="submit" class="btn btn-primary-custom w-100 py-2 mb-3" id="registerBtn">
+          Criar conta
+        </button>
+        
+        <div class="text-center">
+          <span class="text-muted small">Já tem conta?</span>
+          <a href="login.html" class="text-primary-custom text-decoration-none small fw-semibold">Entrar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="../js/auth.js"></script>
+</body>
+</html>
