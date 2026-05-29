@@ -1,8 +1,12 @@
-const API_URL = 'http://localhost:3000/api';
+const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:3000/api'
+  : 'https://desenvolvimentoplataformawebn695-production.up.railway.app/api';
 let users = [];
+let books = [];
 let userModal;
 let deleteModal;
 let toast;
+let currentSection = 'usuarios';
 
 // Check Auth
 const token = localStorage.getItem('token');
@@ -41,6 +45,53 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('dropdownUserName').textContent = `${userData.nome} ${userData.sobrenome}`;
   }
   
+  // Navigation Logic (SPA)
+  const navUsuarios = document.getElementById('navUsuarios');
+  const navAcervo = document.getElementById('navAcervo');
+  const navUsuariosMobile = document.getElementById('navUsuariosMobile');
+  const navAcervoMobile = document.getElementById('navAcervoMobile');
+  
+  const sectionUsuarios = document.getElementById('sectionUsuarios');
+  const sectionAcervo = document.getElementById('sectionAcervo');
+  const sectionAdminLivro = document.getElementById('sectionAdminLivro');
+  
+  const switchSection = (section) => {
+    currentSection = section;
+    
+    // Hide all sections first
+    sectionUsuarios.classList.add('d-none');
+    sectionAcervo.classList.add('d-none');
+    sectionAdminLivro.classList.add('d-none');
+    
+    // Reset nav active states
+    navUsuarios.classList.remove('active');
+    navAcervo.classList.remove('active');
+    navUsuariosMobile.classList.remove('active');
+    navAcervoMobile.classList.remove('active');
+    
+    if (section === 'usuarios') {
+      sectionUsuarios.classList.remove('d-none');
+      navUsuarios.classList.add('active');
+      navUsuariosMobile.classList.add('active');
+      fetchUsers();
+    } else if (section === 'acervo') {
+      sectionAcervo.classList.remove('d-none');
+      navAcervo.classList.add('active');
+      navAcervoMobile.classList.add('active');
+      fetchAdminBooks();
+    } else if (section === 'adminLivro') {
+      sectionAdminLivro.classList.remove('d-none');
+      navAcervo.classList.add('active');
+      navAcervoMobile.classList.add('active');
+    }
+  };
+  
+  navUsuarios.addEventListener('click', (e) => { e.preventDefault(); switchSection('usuarios'); });
+  navAcervo.addEventListener('click', (e) => { e.preventDefault(); switchSection('acervo'); });
+  navUsuariosMobile.addEventListener('click', (e) => { e.preventDefault(); switchSection('usuarios'); });
+  navAcervoMobile.addEventListener('click', (e) => { e.preventDefault(); switchSection('acervo'); });
+  
+  // Initial load
   fetchUsers();
   
   // Logout
@@ -51,6 +102,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Search
   document.getElementById('searchInput').addEventListener('input', (e) => {
     renderTable(e.target.value);
+  });
+  
+  document.getElementById('searchBookInput').addEventListener('input', (e) => {
+    renderBooksTable(e.target.value);
   });
   
   // Form Submit
@@ -67,6 +122,27 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('userSenha').required = true;
     document.getElementById('senhaHelp').classList.add('d-none');
     document.getElementById('modalAlert').classList.add('d-none');
+  });
+  
+  // --- Book Form Event Listeners ---
+  document.getElementById('btnNovoLivro').addEventListener('click', () => {
+    document.getElementById('bookForm').reset();
+    document.getElementById('bookId').value = '';
+    document.getElementById('bookPageTitle').textContent = 'Cadastrar novo livro';
+    document.getElementById('bookPageSubtitle').textContent = 'Preencha os campos e salve';
+    document.getElementById('deleteBookBtn').classList.add('d-none');
+    document.getElementById('bookAlertMessage').classList.add('d-none');
+    switchSection('adminLivro');
+  });
+  
+  document.getElementById('cancelBookBtn').addEventListener('click', () => {
+    switchSection('acervo');
+  });
+  
+  document.getElementById('bookForm').addEventListener('submit', handleBookSubmit);
+  document.getElementById('deleteBookBtn').addEventListener('click', () => {
+    const id = document.getElementById('bookId').value;
+    openDeleteModal(id, 'book');
   });
 });
 
@@ -172,8 +248,12 @@ window.openEditModal = (id) => {
   userModal.show();
 };
 
-window.openDeleteModal = (id) => {
+window.openDeleteModal = (id, type = 'user') => {
   document.getElementById('deleteUserId').value = id;
+  // We use currentSection to determine what to delete, but if called from book form, we force it
+  if (type === 'book') {
+    currentSection = 'adminLivro';
+  }
   deleteModal.show();
 };
 
@@ -231,16 +311,153 @@ const confirmDelete = async () => {
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Excluindo...';
     
-    await axios.delete(`${API_URL}/users/${id}`);
+    if (currentSection === 'usuarios') {
+      await axios.delete(`${API_URL}/users/${id}`);
+      showToast('Usuário excluído com sucesso!');
+      fetchUsers();
+    } else {
+      await axios.delete(`${API_URL}/books/${id}`);
+      showToast('Livro excluído com sucesso!');
+      if (currentSection === 'adminLivro') {
+        switchSection('acervo');
+      } else {
+        fetchAdminBooks();
+      }
+    }
     
     deleteModal.hide();
-    showToast('Usuário excluído com sucesso!');
-    fetchUsers();
   } catch (error) {
-    console.error('Erro ao excluir usuário:', error);
-    alert('Erro ao excluir usuário. Tente novamente.');
+    console.error('Erro ao excluir:', error);
+    alert('Erro ao excluir. Tente novamente.');
   } finally {
     btn.disabled = false;
     btn.textContent = originalText;
+  }
+};
+
+// --- Books Logic for Admin Panel ---
+
+const fetchAdminBooks = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/books`);
+    books = response.data.data || [];
+    renderBooksTable();
+  } catch (error) {
+    console.error('Erro ao buscar livros:', error);
+    document.getElementById('booksTableBody').innerHTML = `
+      <tr><td colspan="5" class="text-center py-4 text-danger">Erro ao carregar o acervo.</td></tr>
+    `;
+  }
+};
+
+const renderBooksTable = (searchTerm = '') => {
+  const tbody = document.getElementById('booksTableBody');
+  
+  const filteredBooks = books.filter(book => {
+    const term = searchTerm.toLowerCase();
+    return book.titulo.toLowerCase().includes(term) || 
+           book.autor.toLowerCase().includes(term) || 
+           book.isbn.toLowerCase().includes(term);
+  });
+  
+  if (filteredBooks.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">Nenhum livro encontrado.</td></tr>`;
+    return;
+  }
+  
+  tbody.innerHTML = filteredBooks.map(book => `
+    <tr>
+      <td class="ps-4 fw-medium text-dark">${book.titulo}</td>
+      <td class="text-muted">${book.autor}</td>
+      <td class="text-muted">${book.genero}</td>
+      <td>
+        <span class="badge ${book.disponivel ? 'badge-ativo' : 'badge-inativo'} px-2 py-1 rounded-pill">
+          ${book.disponivel ? 'Disponível' : 'Emprestado'}
+        </span>
+      </td>
+      <td class="text-end pe-4">
+        <button class="action-btn btn-edit me-1" onclick="openEditBook('${book._id}')" title="Editar">
+          <i class="bi bi-pencil"></i>
+        </button>
+        <button class="action-btn btn-delete" onclick="openDeleteModal('${book._id}', 'book')" title="Excluir">
+          <i class="bi bi-trash"></i>
+        </button>
+      </td>
+    </tr>
+  `).join('');
+};
+
+window.openEditBook = async (id) => {
+  try {
+    const response = await axios.get(`${API_URL}/books/${id}`);
+    const book = response.data;
+    
+    document.getElementById('bookId').value = book._id;
+    document.getElementById('titulo').value = book.titulo;
+    document.getElementById('autor').value = book.autor;
+    document.getElementById('isbn').value = book.isbn;
+    document.getElementById('genero').value = book.genero;
+    document.getElementById('anoPublicacao').value = book.anoPublicacao;
+    document.getElementById('numeroExemplares').value = book.numeroExemplares;
+    document.getElementById('idioma').value = book.idioma;
+    document.getElementById('paginas').value = book.paginas;
+    document.getElementById('sinopse').value = book.sinopse;
+    document.getElementById('urlCapa').value = book.urlCapa || '';
+    
+    document.getElementById('bookPageTitle').textContent = 'Editar livro';
+    document.getElementById('bookPageSubtitle').textContent = 'Altere os campos e salve';
+    document.getElementById('deleteBookBtn').classList.remove('d-none');
+    document.getElementById('bookAlertMessage').classList.add('d-none');
+    
+    switchSection('adminLivro');
+  } catch (error) {
+    console.error('Erro ao buscar dados do livro:', error);
+    alert('Erro ao carregar dados do livro. Ele pode ter sido excluído.');
+  }
+};
+
+const handleBookSubmit = async (e) => {
+  e.preventDefault();
+  
+  const id = document.getElementById('bookId').value;
+  const btn = document.getElementById('saveBookBtn');
+  const originalText = btn.innerHTML;
+  
+  const payload = {
+    titulo: document.getElementById('titulo').value,
+    autor: document.getElementById('autor').value,
+    isbn: document.getElementById('isbn').value,
+    genero: document.getElementById('genero').value,
+    anoPublicacao: parseInt(document.getElementById('anoPublicacao').value),
+    numeroExemplares: parseInt(document.getElementById('numeroExemplares').value),
+    idioma: document.getElementById('idioma').value,
+    paginas: parseInt(document.getElementById('paginas').value),
+    sinopse: document.getElementById('sinopse').value,
+    urlCapa: document.getElementById('urlCapa').value
+  };
+  
+  const alertEl = document.getElementById('bookAlertMessage');
+  
+  try {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Salvando...';
+    
+    if (id) {
+      await axios.put(`${API_URL}/books/${id}`, payload);
+      showToast('Livro atualizado com sucesso!');
+    } else {
+      await axios.post(`${API_URL}/books`, payload);
+      showToast('Livro cadastrado com sucesso!');
+    }
+    
+    switchSection('acervo');
+  } catch (error) {
+    alertEl.textContent = error.response?.data?.message || 'Erro ao salvar livro';
+    alertEl.className = 'alert alert-danger mb-4';
+    alertEl.classList.remove('d-none');
+    window.scrollTo(0, 0);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalText;
   }
 };
