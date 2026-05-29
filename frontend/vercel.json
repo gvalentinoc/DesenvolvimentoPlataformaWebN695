@@ -1,5 +1,18 @@
 {
   "rewrites": [
-    { "source": "/", "destination": "/pages/index.html" }
+    { "source": "/", "destination": "/pages/index.html" },
+    { "source": "/index.html", "destination": "/pages/index.html" },
+    { "source": "/login", "destination": "/pages/login.html" },
+    { "source": "/login.html", "destination": "/pages/login.html" },
+    { "source": "/cadastro", "destination": "/pages/cadastro.html" },
+    { "source": "/cadastro.html", "destination": "/pages/cadastro.html" },
+    { "source": "/admin", "destination": "/pages/admin.html" },
+    { "source": "/admin.html", "destination": "/pages/admin.html" },
+    { "source": "/sucesso", "destination": "/pages/sucesso.html" },
+    { "source": "/sucesso.html", "destination": "/pages/sucesso.html" },
+    { "source": "/acervo", "destination": "/pages/acervo.html" },
+    { "source": "/acervo.html", "destination": "/pages/acervo.html" },
+    { "source": "/livro-detalhe", "destination": "/pages/livro-detalhe.html" },
+    { "source": "/livro-detalhe.html", "destination": "/pages/livro-detalhe.html" }
   ]
 }
