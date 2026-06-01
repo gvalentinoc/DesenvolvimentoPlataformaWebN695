@@ -7,6 +7,39 @@ let userModal;
 let deleteModal;
 let toast;
 let currentSection = 'usuarios';
+let bookViewMode = 'grid';
+let activeBookFilter = 'todos';
+let currentPage = 1;
+const BOOKS_PER_PAGE = 12;
+let bookDetailModal;
+
+const switchSection = (section) => {
+  currentSection = section;
+
+  document.getElementById('sectionUsuarios').classList.add('d-none');
+  document.getElementById('sectionAcervo').classList.add('d-none');
+  document.getElementById('sectionAdminLivro').classList.add('d-none');
+
+  ['navUsuarios', 'navAcervo', 'navUsuariosMobile', 'navAcervoMobile'].forEach(id => {
+    document.getElementById(id).classList.remove('active');
+  });
+
+  if (section === 'usuarios') {
+    document.getElementById('sectionUsuarios').classList.remove('d-none');
+    document.getElementById('navUsuarios').classList.add('active');
+    document.getElementById('navUsuariosMobile').classList.add('active');
+    fetchUsers();
+  } else if (section === 'acervo') {
+    document.getElementById('sectionAcervo').classList.remove('d-none');
+    document.getElementById('navAcervo').classList.add('active');
+    document.getElementById('navAcervoMobile').classList.add('active');
+    fetchAdminBooks();
+  } else if (section === 'adminLivro') {
+    document.getElementById('sectionAdminLivro').classList.remove('d-none');
+    document.getElementById('navAcervo').classList.add('active');
+    document.getElementById('navAcervoMobile').classList.add('active');
+  }
+};
 
 // Check Auth
 const token = localStorage.getItem('token');
@@ -35,6 +68,7 @@ axios.interceptors.response.use(response => response, error => {
 document.addEventListener('DOMContentLoaded', () => {
   userModal = new bootstrap.Modal(document.getElementById('userModal'));
   deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+  bookDetailModal = new bootstrap.Modal(document.getElementById('bookDetailModal'));
   toast = new bootstrap.Toast(document.getElementById('liveToast'));
   
   // Set User Initials in Avatar
@@ -51,40 +85,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const navUsuariosMobile = document.getElementById('navUsuariosMobile');
   const navAcervoMobile = document.getElementById('navAcervoMobile');
   
-  const sectionUsuarios = document.getElementById('sectionUsuarios');
-  const sectionAcervo = document.getElementById('sectionAcervo');
-  const sectionAdminLivro = document.getElementById('sectionAdminLivro');
-  
-  const switchSection = (section) => {
-    currentSection = section;
-    
-    // Hide all sections first
-    sectionUsuarios.classList.add('d-none');
-    sectionAcervo.classList.add('d-none');
-    sectionAdminLivro.classList.add('d-none');
-    
-    // Reset nav active states
-    navUsuarios.classList.remove('active');
-    navAcervo.classList.remove('active');
-    navUsuariosMobile.classList.remove('active');
-    navAcervoMobile.classList.remove('active');
-    
-    if (section === 'usuarios') {
-      sectionUsuarios.classList.remove('d-none');
-      navUsuarios.classList.add('active');
-      navUsuariosMobile.classList.add('active');
-      fetchUsers();
-    } else if (section === 'acervo') {
-      sectionAcervo.classList.remove('d-none');
-      navAcervo.classList.add('active');
-      navAcervoMobile.classList.add('active');
-      fetchAdminBooks();
-    } else if (section === 'adminLivro') {
-      sectionAdminLivro.classList.remove('d-none');
-      navAcervo.classList.add('active');
-      navAcervoMobile.classList.add('active');
-    }
-  };
   
   navUsuarios.addEventListener('click', (e) => { e.preventDefault(); switchSection('usuarios'); });
   navAcervo.addEventListener('click', (e) => { e.preventDefault(); switchSection('acervo'); });
@@ -104,8 +104,39 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTable(e.target.value);
   });
   
-  document.getElementById('searchBookInput').addEventListener('input', (e) => {
-    renderBooksTable(e.target.value);
+  document.getElementById('searchBookInput').addEventListener('input', () => {
+    currentPage = 1;
+    renderBooks();
+  });
+
+  // View toggle
+  document.getElementById('btnViewGrid').addEventListener('click', () => {
+    bookViewMode = 'grid';
+    document.getElementById('btnViewGrid').classList.add('active');
+    document.getElementById('btnViewList').classList.remove('active');
+    document.getElementById('booksGrid').classList.remove('d-none');
+    document.getElementById('booksList').classList.add('d-none');
+    renderBooks();
+  });
+
+  document.getElementById('btnViewList').addEventListener('click', () => {
+    bookViewMode = 'list';
+    document.getElementById('btnViewList').classList.add('active');
+    document.getElementById('btnViewGrid').classList.remove('active');
+    document.getElementById('booksGrid').classList.add('d-none');
+    document.getElementById('booksList').classList.remove('d-none');
+    renderBooks();
+  });
+
+  // Filter buttons
+  document.getElementById('bookFilters').addEventListener('click', (e) => {
+    const btn = e.target.closest('.book-filter-btn');
+    if (!btn) return;
+    document.querySelectorAll('.book-filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeBookFilter = btn.dataset.filter;
+    currentPage = 1;
+    renderBooks();
   });
   
   // Form Submit
@@ -339,33 +370,90 @@ const confirmDelete = async () => {
 
 const fetchAdminBooks = async () => {
   try {
-    const response = await axios.get(`${API_URL}/books`);
+    const response = await axios.get(`${API_URL}/books?limite=1000`);
     books = response.data.data || [];
-    renderBooksTable();
+    currentPage = 1;
+    renderBooks();
   } catch (error) {
     console.error('Erro ao buscar livros:', error);
-    document.getElementById('booksTableBody').innerHTML = `
-      <tr><td colspan="5" class="text-center py-4 text-danger">Erro ao carregar o acervo.</td></tr>
-    `;
+    document.getElementById('booksGrid').innerHTML = `<div class="col-12 text-center py-5 text-danger">Erro ao carregar o acervo.</div>`;
   }
 };
 
-const renderBooksTable = (searchTerm = '') => {
-  const tbody = document.getElementById('booksTableBody');
-  
-  const filteredBooks = books.filter(book => {
-    const term = searchTerm.toLowerCase();
-    return book.titulo.toLowerCase().includes(term) || 
-           book.autor.toLowerCase().includes(term) || 
-           book.isbn.toLowerCase().includes(term);
+const getFilteredBooks = () => {
+  const searchTerm = document.getElementById('searchBookInput').value.toLowerCase();
+  return books.filter(book => {
+    const matchesSearch = !searchTerm ||
+      book.titulo.toLowerCase().includes(searchTerm) ||
+      book.autor.toLowerCase().includes(searchTerm) ||
+      book.isbn.toLowerCase().includes(searchTerm);
+    const matchesFilter = activeBookFilter === 'todos' ||
+      (activeBookFilter === 'Disponível' && book.disponivel) ||
+      book.genero === activeBookFilter;
+    return matchesSearch && matchesFilter;
   });
-  
-  if (filteredBooks.length === 0) {
+};
+
+const renderBooks = () => {
+  const filtered = getFilteredBooks();
+  const total = filtered.length;
+  const totalPages = Math.ceil(total / BOOKS_PER_PAGE);
+  const paginated = filtered.slice((currentPage - 1) * BOOKS_PER_PAGE, currentPage * BOOKS_PER_PAGE);
+
+  document.getElementById('booksCount').textContent = `${total} livro${total !== 1 ? 's' : ''} encontrado${total !== 1 ? 's' : ''}`;
+
+  if (bookViewMode === 'grid') {
+    renderBooksGrid(paginated, total);
+  } else {
+    renderBooksTable(paginated, total);
+  }
+  renderPagination(totalPages);
+};
+
+const renderBooksGrid = (paginated, total) => {
+  const grid = document.getElementById('booksGrid');
+  if (total === 0) {
+    grid.innerHTML = `<div class="col-12 text-center py-5 text-muted">Nenhum livro encontrado.</div>`;
+    return;
+  }
+  grid.innerHTML = paginated.map(book => `
+    <div class="col-6 col-sm-4 col-md-3 col-xl-2">
+      <div class="book-card h-100" onclick="openBookDetail('${book._id}')" style="cursor:pointer;">
+        <div class="book-card-cover">
+          ${book.urlCapa
+            ? `<img src="${book.urlCapa}" alt="${book.titulo}" onerror="this.parentElement.innerHTML='<i class=\\'bi bi-book cover-placeholder\\'></i>'">`
+            : `<i class="bi bi-book cover-placeholder"></i>`}
+        </div>
+        <div class="book-card-body">
+          <div class="book-card-genre mb-1">${book.genero}</div>
+          <div class="book-card-title" title="${book.titulo}">${book.titulo}</div>
+          <div class="book-card-author">${book.autor}</div>
+          <div class="book-card-footer">
+            <span class="badge ${book.disponivel ? 'badge-ativo' : 'badge-inativo'} px-2 py-1 rounded-pill" style="font-size:11px;">
+              ${book.disponivel ? 'Disponível' : 'Emprestado'}
+            </span>
+            <div class="d-flex gap-1">
+              <button class="action-btn btn-edit" onclick="event.stopPropagation();openEditBook('${book._id}')" title="Editar">
+                <i class="bi bi-pencil" style="font-size:12px;"></i>
+              </button>
+              <button class="action-btn btn-delete" onclick="event.stopPropagation();openDeleteModal('${book._id}', 'book')" title="Excluir">
+                <i class="bi bi-trash" style="font-size:12px;"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+};
+
+const renderBooksTable = (paginated, total) => {
+  const tbody = document.getElementById('booksTableBody');
+  if (total === 0) {
     tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">Nenhum livro encontrado.</td></tr>`;
     return;
   }
-  
-  tbody.innerHTML = filteredBooks.map(book => `
+  tbody.innerHTML = paginated.map(book => `
     <tr>
       <td class="ps-4 fw-medium text-dark">${book.titulo}</td>
       <td class="text-muted">${book.autor}</td>
@@ -387,33 +475,91 @@ const renderBooksTable = (searchTerm = '') => {
   `).join('');
 };
 
-window.openEditBook = async (id) => {
-  try {
-    const response = await axios.get(`${API_URL}/books/${id}`);
-    const book = response.data;
-    
-    document.getElementById('bookId').value = book._id;
-    document.getElementById('titulo').value = book.titulo;
-    document.getElementById('autor').value = book.autor;
-    document.getElementById('isbn').value = book.isbn;
-    document.getElementById('genero').value = book.genero;
-    document.getElementById('anoPublicacao').value = book.anoPublicacao;
-    document.getElementById('numeroExemplares').value = book.numeroExemplares;
-    document.getElementById('idioma').value = book.idioma;
-    document.getElementById('paginas').value = book.paginas;
-    document.getElementById('sinopse').value = book.sinopse;
-    document.getElementById('urlCapa').value = book.urlCapa || '';
-    
-    document.getElementById('bookPageTitle').textContent = 'Editar livro';
-    document.getElementById('bookPageSubtitle').textContent = 'Altere os campos e salve';
-    document.getElementById('deleteBookBtn').classList.remove('d-none');
-    document.getElementById('bookAlertMessage').classList.add('d-none');
-    
-    switchSection('adminLivro');
-  } catch (error) {
-    console.error('Erro ao buscar dados do livro:', error);
-    alert('Erro ao carregar dados do livro. Ele pode ter sido excluído.');
+const renderPagination = (totalPages) => {
+  const nav = document.getElementById('booksPagination');
+  const list = document.getElementById('paginationList');
+  if (totalPages <= 1) { nav.classList.add('d-none'); return; }
+  nav.classList.remove('d-none');
+  let html = `
+    <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+      <a class="page-link" href="#" onclick="goToPage(${currentPage - 1})">← Ant.</a>
+    </li>`;
+  for (let i = 1; i <= totalPages; i++) {
+    html += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+      <a class="page-link" href="#" onclick="goToPage(${i})">${i}</a>
+    </li>`;
   }
+  html += `<li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+    <a class="page-link" href="#" onclick="goToPage(${currentPage + 1})">Próx. →</a>
+  </li>`;
+  list.innerHTML = html;
+};
+
+window.openBookDetail = (id) => {
+  const book = books.find(b => b._id === id);
+  if (!book) return;
+
+  const cover = document.getElementById('detailCover');
+  if (book.urlCapa) {
+    cover.innerHTML = `<img src="${book.urlCapa}" style="width:100%;height:100%;object-fit:cover;" onerror="this.parentElement.innerHTML='<i class=\\'bi bi-book text-white\\' style=\\'font-size:1.8rem;opacity:0.5;\\'></i>'">`;
+  } else {
+    cover.innerHTML = `<i class="bi bi-book text-white" style="font-size:1.8rem;opacity:0.5;"></i>`;
+  }
+
+  document.getElementById('detailTitulo').textContent = book.titulo;
+  document.getElementById('detailAutor').textContent = book.autor;
+  document.getElementById('detailIsbn').textContent = book.isbn;
+  document.getElementById('detailAno').textContent = book.anoPublicacao;
+  document.getElementById('detailPaginas').textContent = book.paginas;
+  document.getElementById('detailSinopse').textContent = book.sinopse || 'Sem sinopse cadastrada.';
+  document.getElementById('detailGeneroBadge').textContent = book.genero;
+
+  const statusBadge = document.getElementById('detailStatusBadge');
+  if (book.disponivel) {
+    statusBadge.textContent = `Disponível (${book.numeroExemplares} ex.)`;
+    statusBadge.className = 'badge badge-ativo px-2 py-1 rounded-pill';
+  } else {
+    statusBadge.textContent = 'Emprestado';
+    statusBadge.className = 'badge badge-inativo px-2 py-1 rounded-pill';
+  }
+
+  document.getElementById('detailEditBtn').onclick = () => { bookDetailModal.hide(); openEditBook(id); };
+  document.getElementById('detailDeleteBtn').onclick = () => { bookDetailModal.hide(); openDeleteModal(id, 'book'); };
+
+  bookDetailModal.show();
+};
+
+window.goToPage = (page) => {
+  const filtered = getFilteredBooks();
+  const totalPages = Math.ceil(filtered.length / BOOKS_PER_PAGE);
+  if (page < 1 || page > totalPages) return;
+  currentPage = page;
+  renderBooks();
+  document.getElementById('sectionAcervo').scrollIntoView({ behavior: 'smooth' });
+};
+
+window.openEditBook = (id) => {
+  const book = books.find(b => b._id === id);
+  if (!book) { alert('Livro não encontrado. Recarregue o acervo.'); return; }
+
+  document.getElementById('bookId').value = book._id;
+  document.getElementById('titulo').value = book.titulo;
+  document.getElementById('autor').value = book.autor;
+  document.getElementById('isbn').value = book.isbn;
+  document.getElementById('genero').value = book.genero;
+  document.getElementById('anoPublicacao').value = book.anoPublicacao;
+  document.getElementById('numeroExemplares').value = book.numeroExemplares;
+  document.getElementById('idioma').value = book.idioma;
+  document.getElementById('paginas').value = book.paginas;
+  document.getElementById('sinopse').value = book.sinopse;
+  document.getElementById('urlCapa').value = book.urlCapa || '';
+
+  document.getElementById('bookPageTitle').textContent = 'Editar livro';
+  document.getElementById('bookPageSubtitle').textContent = 'Altere os campos e salve';
+  document.getElementById('deleteBookBtn').classList.remove('d-none');
+  document.getElementById('bookAlertMessage').classList.add('d-none');
+
+  switchSection('adminLivro');
 };
 
 const handleBookSubmit = async (e) => {
@@ -438,19 +584,17 @@ const handleBookSubmit = async (e) => {
   
   const alertEl = document.getElementById('bookAlertMessage');
   
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Salvando...';
+
+  let saved = false;
   try {
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Salvando...';
-    
     if (id) {
       await axios.put(`${API_URL}/books/${id}`, payload);
-      showToast('Livro atualizado com sucesso!');
     } else {
       await axios.post(`${API_URL}/books`, payload);
-      showToast('Livro cadastrado com sucesso!');
     }
-    
-    switchSection('acervo');
+    saved = true;
   } catch (error) {
     alertEl.textContent = error.response?.data?.message || 'Erro ao salvar livro';
     alertEl.className = 'alert alert-danger mb-4';
@@ -459,5 +603,10 @@ const handleBookSubmit = async (e) => {
   } finally {
     btn.disabled = false;
     btn.innerHTML = originalText;
+  }
+
+  if (saved) {
+    showToast(id ? 'Livro atualizado com sucesso!' : 'Livro cadastrado com sucesso!');
+    switchSection('acervo');
   }
 };

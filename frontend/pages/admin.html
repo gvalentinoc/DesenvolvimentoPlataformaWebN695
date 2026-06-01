@@ -193,21 +193,50 @@
         <!-- SECTION: ACERVO -->
         <div id="sectionAcervo" class="d-none">
           <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-4">
-            <h1 class="h3 fw-bold text-dark mb-0">Gestão de acervo</h1>
-            <button class="btn btn-primary-custom mt-3 mt-md-0" id="btnNovoLivro">
-              <i class="bi bi-plus-lg me-1"></i> Novo livro
-            </button>
+            <h1 class="h3 fw-bold text-dark mb-0">Acervo de livros</h1>
+            <div class="d-flex align-items-center gap-2 mt-3 mt-md-0">
+              <div class="btn-group" role="group">
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="btnViewList" title="Lista">
+                  <i class="bi bi-list-ul"></i> Lista
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-secondary active" id="btnViewGrid" title="Grid">
+                  <i class="bi bi-grid"></i> Grid
+                </button>
+              </div>
+              <button class="btn btn-primary-custom" id="btnNovoLivro">
+                <i class="bi bi-plus-lg me-1"></i> Novo livro
+              </button>
+            </div>
           </div>
 
-          <!-- Search and Table for Books -->
-          <div class="bg-white rounded-3 border p-0 overflow-hidden">
-            <div class="p-3 border-bottom bg-light">
-              <div class="input-group" style="max-width: 400px;">
-                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-                <input type="text" class="form-control border-start-0 ps-0" id="searchBookInput" placeholder="Buscar por título, autor ou ISBN...">
-              </div>
+          <!-- Search + Filters -->
+          <div class="mb-4">
+            <div class="input-group mb-3" style="max-width: 500px;">
+              <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+              <input type="text" class="form-control border-start-0 ps-0" id="searchBookInput" placeholder="Buscar por título, autor ou ISBN...">
             </div>
-            
+            <div class="d-flex flex-wrap gap-2" id="bookFilters">
+              <button class="btn btn-sm book-filter-btn active" data-filter="todos">Todos</button>
+              <button class="btn btn-sm book-filter-btn" data-filter="Disponível">Disponíveis</button>
+              <button class="btn btn-sm book-filter-btn" data-filter="Literatura">Literatura</button>
+              <button class="btn btn-sm book-filter-btn" data-filter="Ficção científica">Ficção científica</button>
+              <button class="btn btn-sm book-filter-btn" data-filter="Filosofia">Filosofia</button>
+              <button class="btn btn-sm book-filter-btn" data-filter="Romance">Romance</button>
+              <button class="btn btn-sm book-filter-btn" data-filter="Poesia">Poesia</button>
+              <button class="btn btn-sm book-filter-btn" data-filter="Biografia">Biografia</button>
+              <button class="btn btn-sm book-filter-btn" data-filter="História">História</button>
+              <button class="btn btn-sm book-filter-btn" data-filter="Técnico">Técnico</button>
+            </div>
+          </div>
+
+          <!-- Books Count -->
+          <p class="text-muted small mb-3" id="booksCount"></p>
+
+          <!-- Grid View -->
+          <div id="booksGrid" class="row g-3 mb-4"></div>
+
+          <!-- List View -->
+          <div id="booksList" class="bg-white rounded-3 border p-0 overflow-hidden d-none">
             <div class="table-responsive">
               <table class="table table-hover align-middle mb-0">
                 <thead class="table-light text-muted small">
@@ -220,7 +249,6 @@
                   </tr>
                 </thead>
                 <tbody id="booksTableBody">
-                  <!-- Rows will be populated by JS -->
                   <tr>
                     <td colspan="5" class="text-center py-4 text-muted">Carregando acervo...</td>
                   </tr>
@@ -228,6 +256,11 @@
               </table>
             </div>
           </div>
+
+          <!-- Pagination -->
+          <nav id="booksPagination" class="d-none">
+            <ul class="pagination justify-content-center" id="paginationList"></ul>
+          </nav>
         </div>
 
         <!-- SECTION: ADMIN LIVRO (CREATE/EDIT) -->
@@ -386,6 +419,53 @@
           <div class="d-flex justify-content-center gap-2">
             <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Cancelar</button>
             <button type="button" class="btn btn-danger px-4" id="confirmDeleteBtn">Excluir</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Book Detail Modal -->
+  <div class="modal fade" id="bookDetailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 520px;">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-body p-0">
+          <button type="button" class="btn-close position-absolute top-0 end-0 m-3" data-bs-dismiss="modal" aria-label="Close" style="z-index:10;"></button>
+
+          <!-- Cover + Title Row -->
+          <div class="d-flex gap-3 p-4 pb-3 border-bottom">
+            <div id="detailCover" class="flex-shrink-0 rounded-2 overflow-hidden" style="width:72px;height:96px;background:linear-gradient(135deg,#1E1B4B 0%,#3730A3 100%);display:flex;align-items:center;justify-content:center;">
+              <i class="bi bi-book text-white" style="font-size:1.8rem;opacity:0.5;"></i>
+            </div>
+            <div class="flex-grow-1 min-width-0">
+              <h5 class="fw-bold text-dark mb-1" id="detailTitulo" style="line-height:1.3;"></h5>
+              <p class="text-muted small mb-2" id="detailAutor"></p>
+              <div class="d-flex flex-wrap gap-2 align-items-center">
+                <span id="detailStatusBadge" class="badge px-2 py-1 rounded-pill" style="font-size:12px;"></span>
+                <span id="detailGeneroBadge" class="badge bg-light text-primary-custom border px-2 py-1 rounded-pill" style="font-size:12px;"></span>
+              </div>
+              <div class="d-flex flex-wrap gap-3 mt-2">
+                <span class="text-muted small"><i class="bi bi-upc-scan me-1"></i><span id="detailIsbn"></span></span>
+                <span class="text-muted small"><i class="bi bi-calendar3 me-1"></i><span id="detailAno"></span></span>
+                <span class="text-muted small"><i class="bi bi-file-text me-1"></i><span id="detailPaginas"></span> págs.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sinopse -->
+          <div class="px-4 py-3 border-bottom">
+            <p class="text-muted small fw-semibold mb-1">Sinopse</p>
+            <p class="small text-dark mb-0" id="detailSinopse" style="line-height:1.6;"></p>
+          </div>
+
+          <!-- Actions -->
+          <div class="d-flex gap-2 p-4">
+            <button class="btn btn-primary-custom flex-grow-1" id="detailEditBtn">
+              <i class="bi bi-pencil me-2"></i> Editar livro
+            </button>
+            <button class="btn btn-outline-danger" id="detailDeleteBtn" title="Excluir">
+              <i class="bi bi-trash"></i>
+            </button>
           </div>
         </div>
       </div>
