@@ -1,20 +1,28 @@
 # BiblioTeca
 
-Sistema web de gestão de biblioteca com autenticação de usuários e painel administrativo.
+Sistema web de gestão de biblioteca com autenticação de usuários, painel administrativo e gerenciamento de acervo.
 
 ## Sobre o projeto
 
-O **BiblioTeca** é uma plataforma web fullstack que permite o gerenciamento de usuários de uma biblioteca. Conta com fluxo completo de autenticação (registro e login com JWT), painel administrativo protegido e conformidade com a LGPD.
+O **BiblioTeca** é uma plataforma web fullstack para gerenciamento de biblioteca. Conta com fluxo completo de autenticação (registro e login com JWT), painel administrativo protegido, CRUD de usuários e acervo de livros com busca, filtros por gênero, visualização em grid/lista e paginação.
 
 ## Funcionalidades
 
-- Cadastro de usuários com consentimento LGPD
+### Usuários
+- Cadastro com consentimento LGPD
 - Login com autenticação via JWT
-- Painel administrativo (CRUD completo de usuários)
-- Proteção de rotas por middleware de autenticação
-- Busca de usuários em tempo real
 - Hash de senha com bcrypt
 - Logout e gerenciamento de sessão via localStorage
+
+### Painel administrativo
+- CRUD completo de usuários
+- Busca de usuários em tempo real
+- CRUD completo do acervo de livros
+- Visualização em grid ou lista
+- Filtros por gênero e disponibilidade
+- Paginação client-side (12 livros por página)
+- Modal de detalhe do livro com capa, sinopse e ações rápidas
+- Proteção de rotas por middleware JWT
 
 ## Tecnologias
 
@@ -41,13 +49,16 @@ biblioteca/
 │       │   └── db.js
 │       ├── controllers/
 │       │   ├── authController.js
+│       │   ├── bookController.js
 │       │   └── userController.js
 │       ├── middleware/
 │       │   └── authMiddleware.js
 │       ├── models/
+│       │   ├── Book.js
 │       │   └── User.js
 │       └── routes/
 │           ├── authRoutes.js
+│           ├── bookRoutes.js
 │           └── userRoutes.js
 └── frontend/
     ├── css/
@@ -65,14 +76,31 @@ biblioteca/
 
 ## Endpoints da API
 
+### Autenticação
+
 | Método | Rota | Descrição | Autenticação |
 |--------|------|-----------|--------------|
 | POST | `/api/auth/register` | Cadastro de usuário | Não |
 | POST | `/api/auth/login` | Login | Não |
+
+### Usuários
+
+| Método | Rota | Descrição | Autenticação |
+|--------|------|-----------|--------------|
 | GET | `/api/users` | Listar usuários | JWT |
 | POST | `/api/users` | Criar usuário | JWT |
 | PUT | `/api/users/:id` | Atualizar usuário | JWT |
 | DELETE | `/api/users/:id` | Deletar usuário | JWT |
+
+### Acervo
+
+| Método | Rota | Descrição | Autenticação |
+|--------|------|-----------|--------------|
+| GET | `/api/books` | Listar livros | Não |
+| GET | `/api/books/:id` | Buscar livro por ID | Não |
+| POST | `/api/books` | Cadastrar livro | JWT |
+| PUT | `/api/books/:id` | Atualizar livro | JWT |
+| DELETE | `/api/books/:id` | Excluir livro | JWT |
 
 ## Como executar
 
