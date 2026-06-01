@@ -62,7 +62,8 @@ const getBooks = async (req, res) => {
       data: books
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('[getBooks]', error);
+    res.status(500).json({ message: 'Erro interno no servidor.' });
   }
 };
 
@@ -78,7 +79,8 @@ const getBookById = async (req, res) => {
       res.status(404).json({ message: 'Livro não encontrado' });
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('[getBookById]', error);
+    res.status(500).json({ message: 'Erro interno no servidor.' });
   }
 };
 
@@ -93,9 +95,11 @@ const createBook = async (req, res) => {
     }
     
     const book = await Book.create(req.body);
+    console.info(`[audit] livro-criado bookId=${book._id} solicitante=${req.user?._id}`);
     res.status(201).json(book);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error('[createBook]', error);
+    res.status(400).json({ message: 'Erro ao criar livro. Verifique os dados enviados.' });
   }
 };
 
@@ -123,9 +127,11 @@ const updateBook = async (req, res) => {
       runValidators: true
     });
     
+    console.info(`[audit] livro-editado bookId=${req.params.id} solicitante=${req.user?._id}`);
     res.json(book);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error('[updateBook]', error);
+    res.status(400).json({ message: 'Erro ao atualizar livro. Verifique os dados enviados.' });
   }
 };
 
@@ -141,9 +147,11 @@ const deleteBook = async (req, res) => {
     }
     
     await Book.deleteOne({ _id: book._id });
+    console.info(`[audit] livro-deletado bookId=${req.params.id} solicitante=${req.user?._id}`);
     res.json({ message: 'Livro removido com sucesso' });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('[deleteBook]', error);
+    res.status(500).json({ message: 'Erro interno no servidor.' });
   }
 };
 

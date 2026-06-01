@@ -2,7 +2,7 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '7d' });
 };
 
 const register = async (req, res) => {
@@ -22,7 +22,8 @@ const register = async (req, res) => {
       res.status(400).json({ message: 'Dados de usuário inválidos' });
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('[register]', error);
+    res.status(500).json({ message: 'Erro interno no servidor.' });
   }
 };
 
@@ -30,17 +31,20 @@ const login = async (req, res) => {
   try {
     const { email, senha } = req.body;
     const user = await User.findOne({ email }).select('+senha');
-    
+
     if (user && (await user.matchPassword(senha))) {
       if (user.status === 'Inativo') return res.status(401).json({ message: 'Conta inativa.' });
+      console.info(`[audit] login email=${email} userId=${user._id}`);
       res.json({
         _id: user._id, nome: user.nome, sobrenome: user.sobrenome, email: user.email, token: generateToken(user._id)
       });
     } else {
+      console.warn(`[audit] login-falhou email=${email}`);
       res.status(401).json({ message: 'E-mail ou senha inválidos' });
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('[login]', error);
+    res.status(500).json({ message: 'Erro interno no servidor.' });
   }
 };
 

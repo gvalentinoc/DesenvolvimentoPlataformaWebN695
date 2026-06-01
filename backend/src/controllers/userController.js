@@ -3,9 +3,11 @@ const User = require('../models/User');
 const getUsers = async (req, res) => {
   try {
     const users = await User.find({}).select('-senha');
+    console.info(`[audit] listagem-usuarios solicitante=${req.user?._id}`);
     res.json(users);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('[getUsers]', error);
+    res.status(500).json({ message: 'Erro interno no servidor.' });
   }
 };
 
@@ -20,12 +22,14 @@ const createUser = async (req, res) => {
     });
 
     if (user) {
+      console.info(`[audit] usuario-criado newUserId=${user._id} solicitante=${req.user?._id}`);
       res.status(201).json({ _id: user._id, nome: user.nome, sobrenome: user.sobrenome, email: user.email, status: user.status });
     } else {
       res.status(400).json({ message: 'Dados de usuário inválidos' });
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('[createUser]', error);
+    res.status(500).json({ message: 'Erro interno no servidor.' });
   }
 };
 
@@ -38,14 +42,16 @@ const updateUser = async (req, res) => {
       user.email = req.body.email || user.email;
       user.status = req.body.status || user.status;
       if (req.body.senha) user.senha = req.body.senha;
-      
+
       const updatedUser = await user.save();
+      console.info(`[audit] usuario-editado targetId=${req.params.id} solicitante=${req.user?._id}`);
       res.json({ _id: updatedUser._id, nome: updatedUser.nome, sobrenome: updatedUser.sobrenome, email: updatedUser.email, status: updatedUser.status });
     } else {
       res.status(404).json({ message: 'Usuário não encontrado' });
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('[updateUser]', error);
+    res.status(500).json({ message: 'Erro interno no servidor.' });
   }
 };
 
@@ -54,12 +60,14 @@ const deleteUser = async (req, res) => {
     const user = await User.findById(req.params.id);
     if (user) {
       await User.deleteOne({ _id: user._id });
+      console.info(`[audit] usuario-deletado targetId=${req.params.id} solicitante=${req.user?._id}`);
       res.json({ message: 'Usuário removido' });
     } else {
       res.status(404).json({ message: 'Usuário não encontrado' });
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('[deleteUser]', error);
+    res.status(500).json({ message: 'Erro interno no servidor.' });
   }
 };
 
