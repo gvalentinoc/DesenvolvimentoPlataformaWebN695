@@ -50,9 +50,9 @@ axios.interceptors.request.use(config => {
 });
 
 axios.interceptors.response.use(response => response, error => {
-  if (error.response && error.response.status === 401) {
-    localStorage.removeItem('token');
+  if (error.response && (error.response.status === 401 || error.response.status === 403)) {
     localStorage.removeItem('user');
+    localStorage.removeItem('token');
     window.location.href = 'login.html';
   }
   return Promise.reject(error);
@@ -60,14 +60,18 @@ axios.interceptors.response.use(response => response, error => {
 
 // Initialize Bootstrap Components
 document.addEventListener('DOMContentLoaded', () => {
+  const userData = JSON.parse(localStorage.getItem('user'));
+  if (!userData || userData.role !== 'admin') {
+    window.location.href = userData ? 'leitor.html' : 'login.html';
+    return;
+  }
+
   userModal = new bootstrap.Modal(document.getElementById('userModal'));
   deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
   bookDetailModal = new bootstrap.Modal(document.getElementById('bookDetailModal'));
   toast = new bootstrap.Toast(document.getElementById('liveToast'));
-  
-  // Set User Initials in Avatar
-  const userData = JSON.parse(localStorage.getItem('user'));
-  if (userData && userData.nome && userData.sobrenome) {
+
+  if (userData.nome && userData.sobrenome) {
     const initials = `${userData.nome.charAt(0)}${userData.sobrenome.charAt(0)}`.toUpperCase();
     document.getElementById('userAvatar').textContent = initials;
     document.getElementById('dropdownUserName').textContent = `${userData.nome} ${userData.sobrenome}`;
@@ -147,6 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('userSenha').required = true;
     document.getElementById('senhaHelp').classList.add('d-none');
     document.getElementById('modalAlert').classList.add('d-none');
+    document.getElementById('userRole').value = 'leitor';
   });
   
   // --- Book Form Event Listeners ---
@@ -172,11 +177,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 const logout = async (e) => {
-  e.preventDefault();
-  try {
-    await axios.post(`${API_URL}/auth/logout`);
-  } catch (_) {}
+  e?.preventDefault();
+  try { await axios.post(`${API_URL}/auth/logout`); } catch (_) {}
   localStorage.removeItem('user');
+  localStorage.removeItem('token');
   window.location.href = 'login.html';
 };
 
@@ -230,14 +234,19 @@ const renderTable = (searchTerm = '') => {
   });
   
   if (filteredUsers.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-muted">Nenhum usuário encontrado.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">Nenhum usuário encontrado.</td></tr>`;
     return;
   }
-  
+
   tbody.innerHTML = filteredUsers.map(user => `
     <tr>
       <td class="ps-4 fw-medium text-dark">${user.nome} ${user.sobrenome}</td>
       <td class="text-muted">${user.email}</td>
+      <td>
+        <span class="badge px-2 py-1 rounded-pill fw-normal ${user.role === 'admin' ? 'bg-primary-custom text-white' : 'bg-light text-muted border'}">
+          ${user.role === 'admin' ? 'Admin' : 'Leitor'}
+        </span>
+      </td>
       <td>
         <span class="badge ${user.status === 'Ativo' ? 'badge-ativo' : 'badge-inativo'} px-2 py-1 rounded-pill">
           ${user.status}
@@ -258,12 +267,13 @@ const renderTable = (searchTerm = '') => {
 window.openEditModal = (id) => {
   const user = users.find(u => u._id === id);
   if (!user) return;
-  
+
   document.getElementById('userId').value = user._id;
   document.getElementById('userNome').value = user.nome;
   document.getElementById('userSobrenome').value = user.sobrenome;
   document.getElementById('userEmail').value = user.email;
   document.getElementById('userStatus').value = user.status;
+  document.getElementById('userRole').value = user.role || 'leitor';
   
   document.getElementById('userSenha').required = false;
   document.getElementById('userSenha').value = '';
@@ -301,7 +311,8 @@ const handleUserSubmit = async (e) => {
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Salvando...';
     
-    const payload = { nome, sobrenome, email, status };
+    const role = document.getElementById('userRole').value;
+    const payload = { nome, sobrenome, email, status, role };
     if (senha) payload.senha = senha;
     
     if (id) {

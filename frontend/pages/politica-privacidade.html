@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BiblioTeca - Política de Privacidade</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body class="bg-light d-flex flex-column min-vh-100">
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-light bg-white border-bottom py-3">
+    <div class="container">
+      <a class="navbar-brand fw-bold text-dark d-flex align-items-center" href="index.html">
+        <i class="bi bi-book me-2 text-primary-custom"></i> BiblioTeca
+      </a>
+      <a href="javascript:history.back()" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i> Voltar
+      </a>
+    </div>
+  </nav>
+
+  <main class="container py-5 flex-grow-1" style="max-width: 800px;">
+
+    <div class="d-flex align-items-center gap-3 mb-4">
+      <i class="bi bi-shield-check fs-1 text-primary-custom"></i>
+      <div>
+        <h1 class="fw-bold text-dark mb-0">Política de Privacidade</h1>
+        <p class="text-muted small mb-0">Última atualização: junho de 2025</p>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-3 border p-4 p-md-5">
+
+      <section class="mb-5">
+        <h2 class="h5 fw-bold text-dark mb-3">1. Quem somos (Controlador)</h2>
+        <p class="text-muted">
+          O <strong>BiblioTeca</strong> é o controlador dos dados pessoais tratados nesta plataforma,
+          responsável por definir as finalidades e os meios de tratamento, nos termos da
+          Lei n.º 13.709/2018 (LGPD).
+        </p>
+        <p class="text-muted mb-0">
+          Canal de contato para assuntos de privacidade:<br>
+          <a href="mailto:privacidade@biblioteca.exemplo.br" class="text-primary-custom">privacidade@biblioteca.exemplo.br</a>
+        </p>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h5 fw-bold text-dark mb-3">2. Quais dados coletamos</h2>
+        <ul class="text-muted ps-3">
+          <li class="mb-2"><strong>Dados de cadastro:</strong> nome, sobrenome e endereço de e-mail, fornecidos voluntariamente ao criar uma conta.</li>
+          <li class="mb-2"><strong>Credenciais de acesso:</strong> senha armazenada exclusivamente na forma de hash (bcrypt), nunca em texto claro.</li>
+          <li class="mb-2"><strong>Registro de consentimento:</strong> data e hora em que você aceitou esta política.</li>
+          <li class="mb-2"><strong>Dados de uso:</strong> registro de acessos e ações realizadas na plataforma (logs de auditoria), para fins de segurança e conformidade legal.</li>
+        </ul>
+        <p class="text-muted mb-0">Não coletamos dados sensíveis conforme o art. 5.º, II da LGPD.</p>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h5 fw-bold text-dark mb-3">3. Para que usamos seus dados</h2>
+        <div class="table-responsive">
+          <table class="table table-bordered small text-muted">
+            <thead class="table-light">
+              <tr>
+                <th>Finalidade</th>
+                <th>Base legal (LGPD)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Criação e gerenciamento da sua conta</td>
+                <td>Execução de contrato — art. 7.º, V</td>
+              </tr>
+              <tr>
+                <td>Autenticação e controle de acesso</td>
+                <td>Legítimo interesse — art. 7.º, IX</td>
+              </tr>
+              <tr>
+                <td>Registro de auditoria para segurança</td>
+                <td>Cumprimento de obrigação legal — art. 7.º, II</td>
+              </tr>
+              <tr>
+                <td>Comunicações operacionais da plataforma</td>
+                <td>Consentimento — art. 7.º, I</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h5 fw-bold text-dark mb-3">4. Compartilhamento de dados</h2>
+        <p class="text-muted">
+          Seus dados não são vendidos, alugados ou compartilhados com terceiros para fins comerciais.
+          Podemos compartilhar dados somente nos seguintes casos:
+        </p>
+        <ul class="text-muted ps-3 mb-0">
+          <li class="mb-2">Com provedores de infraestrutura (hospedagem de servidor e banco de dados), exclusivamente para operar a plataforma, sob acordos de confidencialidade.</li>
+          <li>Quando exigido por lei, decisão judicial ou autoridade competente.</li>
+        </ul>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h5 fw-bold text-dark mb-3">5. Cookies e tecnologias similares</h2>
+        <p class="text-muted mb-0">
+          Utilizamos um cookie de sessão (<code>token</code>) com as seguintes características:
+          <strong>httpOnly</strong> (não acessível via JavaScript), <strong>Secure</strong> (somente HTTPS em produção)
+          e duração de <strong>7 dias</strong>. Esse cookie é estritamente necessário para manter sua sessão autenticada.
+          Não utilizamos cookies de rastreamento ou publicidade.
+        </p>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h5 fw-bold text-dark mb-3">6. Por quanto tempo armazenamos seus dados</h2>
+        <ul class="text-muted ps-3 mb-0">
+          <li class="mb-2"><strong>Dados da conta:</strong> mantidos enquanto a conta estiver ativa ou pelo prazo necessário para cumprimento de obrigações legais.</li>
+          <li><strong>Logs de auditoria:</strong> retidos por até 12 meses para fins de segurança e rastreabilidade, após o que são anonimizados.</li>
+        </ul>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h5 fw-bold text-dark mb-3">7. Seus direitos (Art. 18 da LGPD)</h2>
+        <p class="text-muted">Você tem os seguintes direitos em relação aos seus dados pessoais:</p>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <div class="d-flex gap-2">
+              <i class="bi bi-check2 text-primary-custom mt-1 flex-shrink-0"></i>
+              <div><strong class="text-dark small">Acesso</strong><p class="text-muted small mb-0">Confirmar a existência de tratamento e acessar seus dados.</p></div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="d-flex gap-2">
+              <i class="bi bi-check2 text-primary-custom mt-1 flex-shrink-0"></i>
+              <div><strong class="text-dark small">Correção</strong><p class="text-muted small mb-0">Solicitar a atualização de dados incompletos, inexatos ou desatualizados.</p></div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="d-flex gap-2">
+              <i class="bi bi-check2 text-primary-custom mt-1 flex-shrink-0"></i>
+              <div><strong class="text-dark small">Exclusão</strong><p class="text-muted small mb-0">Solicitar a exclusão dos dados tratados com base em consentimento.</p></div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="d-flex gap-2">
+              <i class="bi bi-check2 text-primary-custom mt-1 flex-shrink-0"></i>
+              <div><strong class="text-dark small">Revogação do consentimento</strong><p class="text-muted small mb-0">Retirar o consentimento a qualquer momento, sem prejuízo aos tratamentos anteriores.</p></div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="d-flex gap-2">
+              <i class="bi bi-check2 text-primary-custom mt-1 flex-shrink-0"></i>
+              <div><strong class="text-dark small">Portabilidade</strong><p class="text-muted small mb-0">Receber seus dados em formato estruturado e legível por máquina.</p></div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="d-flex gap-2">
+              <i class="bi bi-check2 text-primary-custom mt-1 flex-shrink-0"></i>
+              <div><strong class="text-dark small">Oposição</strong><p class="text-muted small mb-0">Opor-se ao tratamento baseado em legítimo interesse.</p></div>
+            </div>
+          </div>
+        </div>
+        <div class="alert alert-light border mt-3 mb-0 small text-muted">
+          <i class="bi bi-envelope me-2 text-primary-custom"></i>
+          Para exercer qualquer um desses direitos, envie um e-mail para
+          <a href="mailto:privacidade@biblioteca.exemplo.br" class="text-primary-custom fw-semibold">privacidade@biblioteca.exemplo.br</a>
+          com o assunto "Direitos LGPD". Responderemos em até 15 dias úteis.
+        </div>
+      </section>
+
+      <section class="mb-5">
+        <h2 class="h5 fw-bold text-dark mb-3">8. Segurança</h2>
+        <p class="text-muted mb-0">
+          Adotamos medidas técnicas e organizacionais para proteger seus dados, incluindo:
+          criptografia de senhas (bcrypt), comunicação via HTTPS, cookies httpOnly,
+          controle de acesso por papel (admin/leitor), rate limiting em rotas de autenticação
+          e registro de auditoria de todas as operações sensíveis.
+        </p>
+      </section>
+
+      <section>
+        <h2 class="h5 fw-bold text-dark mb-3">9. Alterações nesta política</h2>
+        <p class="text-muted mb-0">
+          Esta política pode ser atualizada periodicamente. Em caso de alterações relevantes,
+          notificaremos os usuários por e-mail ou mediante aviso na plataforma.
+          A data da última revisão está indicada no topo deste documento.
+        </p>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-top py-4 mt-auto">
+    <div class="container text-center">
+      <p class="text-muted small mb-0">
+        &copy; 2025 BiblioTeca &middot; Todos os direitos reservados
+      </p>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

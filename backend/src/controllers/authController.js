@@ -28,7 +28,7 @@ const register = async (req, res) => {
       const token = generateToken(user._id);
       res.cookie('token', token, COOKIE_OPTIONS);
       res.status(201).json({
-        _id: user._id, nome: user.nome, sobrenome: user.sobrenome, email: user.email, token
+        _id: user._id, nome: user.nome, sobrenome: user.sobrenome, email: user.email, role: user.role, token
       });
     } else {
       res.status(400).json({ message: 'Dados de usuário inválidos' });
@@ -51,7 +51,7 @@ const login = async (req, res) => {
       const token = generateToken(user._id);
       res.cookie('token', token, COOKIE_OPTIONS);
       res.json({
-        _id: user._id, nome: user.nome, sobrenome: user.sobrenome, email: user.email, token
+        _id: user._id, nome: user.nome, sobrenome: user.sobrenome, email: user.email, role: user.role, token
       });
     } else {
       await audit('login-falhou', null, null, { email });
@@ -68,4 +68,9 @@ const logout = (req, res) => {
   res.json({ message: 'Logout realizado com sucesso.' });
 };
 
-module.exports = { register, login, logout };
+const me = (req, res) => {
+  const u = req.user;
+  res.json({ _id: u._id, nome: u.nome, sobrenome: u.sobrenome, email: u.email, role: u.role, status: u.status, dataConsentimento: u.dataConsentimento });
+};
+
+module.exports = { register, login, logout, me };

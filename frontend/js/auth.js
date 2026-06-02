@@ -55,7 +55,7 @@ if (loginForm) {
       if (token) localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
 
-      window.location.href = 'admin.html';
+      window.location.href = userData.role === 'admin' ? 'admin.html' : 'leitor.html';
     } catch (error) {
       showAlert(error.response?.data?.message || 'Erro ao fazer login', 'danger');
       btn.disabled = false;
@@ -94,6 +94,7 @@ if (registerForm) {
       }, { withCredentials: true });
 
       window.location.href = 'sucesso.html';
+      localStorage.removeItem('user');
     } catch (error) {
       if (error.response && error.response.status === 400 && error.response.data.message === 'Usuário já existe') {
         showAlert('Este e-mail já está cadastrado. Por favor, faça login ou use outro e-mail.', 'danger');

@@ -18,13 +18,17 @@ const createUser = async (req, res) => {
     const userExists = await User.findOne({ email });
     if (userExists) return res.status(400).json({ message: 'Usuário já existe' });
 
+    const { role } = req.body;
     const user = await User.create({
-      nome, sobrenome, email, senha, status: status || 'Ativo', lgpdConsent: lgpdConsent !== undefined ? lgpdConsent : true
+      nome, sobrenome, email, senha,
+      role: role || 'leitor',
+      status: status || 'Ativo',
+      lgpdConsent: lgpdConsent !== undefined ? lgpdConsent : true,
     });
 
     if (user) {
       await audit('usuario-criado', req.user?._id, user._id.toString(), { email: user.email });
-      res.status(201).json({ _id: user._id, nome: user.nome, sobrenome: user.sobrenome, email: user.email, status: user.status });
+      res.status(201).json({ _id: user._id, nome: user.nome, sobrenome: user.sobrenome, email: user.email, role: user.role, status: user.status });
     } else {
       res.status(400).json({ message: 'Dados de usuário inválidos' });
     }
@@ -42,11 +46,12 @@ const updateUser = async (req, res) => {
       user.sobrenome = req.body.sobrenome || user.sobrenome;
       user.email = req.body.email || user.email;
       user.status = req.body.status || user.status;
+      if (req.body.role) user.role = req.body.role;
       if (req.body.senha) user.senha = req.body.senha;
 
       const updatedUser = await user.save();
       await audit('usuario-editado', req.user?._id, req.params.id);
-      res.json({ _id: updatedUser._id, nome: updatedUser.nome, sobrenome: updatedUser.sobrenome, email: updatedUser.email, status: updatedUser.status });
+      res.json({ _id: updatedUser._id, nome: updatedUser.nome, sobrenome: updatedUser.sobrenome, email: updatedUser.email, role: updatedUser.role, status: updatedUser.status });
     } else {
       res.status(404).json({ message: 'Usuário não encontrado' });
     }

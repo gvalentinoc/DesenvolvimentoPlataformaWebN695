@@ -13,6 +13,10 @@
     { "source": "/acervo", "destination": "/pages/acervo.html" },
     { "source": "/acervo.html", "destination": "/pages/acervo.html" },
     { "source": "/livro-detalhe", "destination": "/pages/livro-detalhe.html" },
-    { "source": "/livro-detalhe.html", "destination": "/pages/livro-detalhe.html" }
+    { "source": "/livro-detalhe.html", "destination": "/pages/livro-detalhe.html" },
+    { "source": "/leitor", "destination": "/pages/leitor.html" },
+    { "source": "/leitor.html", "destination": "/pages/leitor.html" },
+    { "source": "/politica-privacidade", "destination": "/pages/politica-privacidade.html" },
+    { "source": "/politica-privacidade.html", "destination": "/pages/politica-privacidade.html" }
   ]
 }
