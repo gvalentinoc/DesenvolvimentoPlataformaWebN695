@@ -17,9 +17,12 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
   : ['http://localhost:5500', 'http://127.0.0.1:5500', 'http://localhost:3000'];
 
+// Padrão do projeto Vercel (qualquer deploy preview ou produção)
+const VERCEL_PATTERN = /^https:\/\/desenvolvimento-plataforma-web-n695[a-z0-9-]*\.vercel\.app$/;
+
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.includes(origin) || VERCEL_PATTERN.test(origin)) {
       callback(null, true);
     } else {
       console.warn('CORS bloqueado para origem:', origin);
