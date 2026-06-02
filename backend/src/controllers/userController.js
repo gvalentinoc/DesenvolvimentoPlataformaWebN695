@@ -1,9 +1,10 @@
 const User = require('../models/User');
+const audit = require('../utils/audit');
 
 const getUsers = async (req, res) => {
   try {
     const users = await User.find({}).select('-senha');
-    console.info(`[audit] listagem-usuarios solicitante=${req.user?._id}`);
+    await audit('listagem-usuarios', req.user?._id);
     res.json(users);
   } catch (error) {
     console.error('[getUsers]', error);
@@ -22,7 +23,7 @@ const createUser = async (req, res) => {
     });
 
     if (user) {
-      console.info(`[audit] usuario-criado newUserId=${user._id} solicitante=${req.user?._id}`);
+      await audit('usuario-criado', req.user?._id, user._id.toString(), { email: user.email });
       res.status(201).json({ _id: user._id, nome: user.nome, sobrenome: user.sobrenome, email: user.email, status: user.status });
     } else {
       res.status(400).json({ message: 'Dados de usuário inválidos' });
@@ -44,7 +45,7 @@ const updateUser = async (req, res) => {
       if (req.body.senha) user.senha = req.body.senha;
 
       const updatedUser = await user.save();
-      console.info(`[audit] usuario-editado targetId=${req.params.id} solicitante=${req.user?._id}`);
+      await audit('usuario-editado', req.user?._id, req.params.id);
       res.json({ _id: updatedUser._id, nome: updatedUser.nome, sobrenome: updatedUser.sobrenome, email: updatedUser.email, status: updatedUser.status });
     } else {
       res.status(404).json({ message: 'Usuário não encontrado' });
@@ -60,7 +61,7 @@ const deleteUser = async (req, res) => {
     const user = await User.findById(req.params.id);
     if (user) {
       await User.deleteOne({ _id: user._id });
-      console.info(`[audit] usuario-deletado targetId=${req.params.id} solicitante=${req.user?._id}`);
+      await audit('usuario-deletado', req.user?._id, req.params.id);
       res.json({ message: 'Usuário removido' });
     } else {
       res.status(404).json({ message: 'Usuário não encontrado' });

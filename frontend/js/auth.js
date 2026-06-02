@@ -27,7 +27,6 @@ if (toggleConfirmPassword && confirmPassword) {
   });
 }
 
-// Show Alert
 const showAlert = (message, type) => {
   const alertEl = document.getElementById('alertMessage');
   if (alertEl) {
@@ -45,16 +44,17 @@ if (loginForm) {
     const email = document.getElementById('email').value;
     const senha = document.getElementById('senha').value;
     const btn = document.getElementById('loginBtn');
-    
+
     try {
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Entrando...';
-      
-      const response = await axios.post(`${API_URL}/auth/login`, { email, senha });
-      
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data));
-      
+
+      const response = await axios.post(`${API_URL}/auth/login`, { email, senha }, { withCredentials: true });
+
+      const { token, ...userData } = response.data;
+      if (token) localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(userData));
+
       window.location.href = 'admin.html';
     } catch (error) {
       showAlert(error.response?.data?.message || 'Erro ao fazer login', 'danger');
@@ -69,7 +69,7 @@ const registerForm = document.getElementById('registerForm');
 if (registerForm) {
   registerForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     const nome = document.getElementById('nome').value;
     const sobrenome = document.getElementById('sobrenome').value;
     const email = document.getElementById('email').value;
@@ -77,26 +77,24 @@ if (registerForm) {
     const confirmarSenha = document.getElementById('confirmarSenha').value;
     const lgpdConsent = document.getElementById('lgpdConsent').checked;
     const btn = document.getElementById('registerBtn');
-    
+
     if (senha !== confirmarSenha) {
       document.getElementById('confirmarSenha').classList.add('is-invalid');
       return;
     } else {
       document.getElementById('confirmarSenha').classList.remove('is-invalid');
     }
-    
+
     try {
       btn.disabled = true;
       btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Criando conta...';
-      
+
       await axios.post(`${API_URL}/auth/register`, {
         nome, sobrenome, email, senha, lgpdConsent
-      });
-      
-      // Redirect to success screen instead of auto-login
+      }, { withCredentials: true });
+
       window.location.href = 'sucesso.html';
     } catch (error) {
-      // Handle duplicate email error specifically
       if (error.response && error.response.status === 400 && error.response.data.message === 'Usuário já existe') {
         showAlert('Este e-mail já está cadastrado. Por favor, faça login ou use outro e-mail.', 'danger');
       } else {

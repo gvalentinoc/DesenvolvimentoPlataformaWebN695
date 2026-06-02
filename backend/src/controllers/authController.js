@@ -1,5 +1,15 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const audit = require('../utils/audit');
+
+const isProduction = process.env.NODE_ENV === 'production';
+
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: isProduction,
+  sameSite: isProduction ? 'none' : 'lax',
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 dias em ms
+};
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '7d' });
@@ -9,14 +19,16 @@ const register = async (req, res) => {
   try {
     const { nome, sobrenome, email, senha, lgpdConsent } = req.body;
     if (!lgpdConsent) return res.status(400).json({ message: 'Consentimento LGPD é obrigatório' });
-    
+
     const userExists = await User.findOne({ email });
     if (userExists) return res.status(400).json({ message: 'Usuário já existe' });
 
     const user = await User.create({ nome, sobrenome, email, senha, lgpdConsent });
     if (user) {
+      const token = generateToken(user._id);
+      res.cookie('token', token, COOKIE_OPTIONS);
       res.status(201).json({
-        _id: user._id, nome: user.nome, sobrenome: user.sobrenome, email: user.email, token: generateToken(user._id)
+        _id: user._id, nome: user.nome, sobrenome: user.sobrenome, email: user.email, token
       });
     } else {
       res.status(400).json({ message: 'Dados de usuário inválidos' });
@@ -34,12 +46,15 @@ const login = async (req, res) => {
 
     if (user && (await user.matchPassword(senha))) {
       if (user.status === 'Inativo') return res.status(401).json({ message: 'Conta inativa.' });
-      console.info(`[audit] login email=${email} userId=${user._id}`);
+      await User.findByIdAndUpdate(user._id, { ultimoLogin: new Date() });
+      await audit('login', user._id, user._id.toString(), { email });
+      const token = generateToken(user._id);
+      res.cookie('token', token, COOKIE_OPTIONS);
       res.json({
-        _id: user._id, nome: user.nome, sobrenome: user.sobrenome, email: user.email, token: generateToken(user._id)
+        _id: user._id, nome: user.nome, sobrenome: user.sobrenome, email: user.email, token
       });
     } else {
-      console.warn(`[audit] login-falhou email=${email}`);
+      await audit('login-falhou', null, null, { email });
       res.status(401).json({ message: 'E-mail ou senha inválidos' });
     }
   } catch (error) {
@@ -48,4 +63,9 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { register, login };
+const logout = (req, res) => {
+  res.clearCookie('token', COOKIE_OPTIONS);
+  res.json({ message: 'Logout realizado com sucesso.' });
+};
+
+module.exports = { register, login, logout };

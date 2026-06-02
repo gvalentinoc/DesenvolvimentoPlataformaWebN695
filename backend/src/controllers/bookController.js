@@ -1,4 +1,5 @@
 const Book = require('../models/Book');
+const audit = require('../utils/audit');
 
 // @desc    Get all books (with filtering and pagination)
 // @route   GET /api/books
@@ -95,7 +96,7 @@ const createBook = async (req, res) => {
     }
     
     const book = await Book.create(req.body);
-    console.info(`[audit] livro-criado bookId=${book._id} solicitante=${req.user?._id}`);
+    await audit('livro-criado', req.user?._id, book._id.toString(), { titulo: book.titulo });
     res.status(201).json(book);
   } catch (error) {
     console.error('[createBook]', error);
@@ -127,7 +128,7 @@ const updateBook = async (req, res) => {
       runValidators: true
     });
     
-    console.info(`[audit] livro-editado bookId=${req.params.id} solicitante=${req.user?._id}`);
+    await audit('livro-editado', req.user?._id, req.params.id);
     res.json(book);
   } catch (error) {
     console.error('[updateBook]', error);
@@ -147,7 +148,7 @@ const deleteBook = async (req, res) => {
     }
     
     await Book.deleteOne({ _id: book._id });
-    console.info(`[audit] livro-deletado bookId=${req.params.id} solicitante=${req.user?._id}`);
+    await audit('livro-deletado', req.user?._id, req.params.id);
     res.json({ message: 'Livro removido com sucesso' });
   } catch (error) {
     console.error('[deleteBook]', error);

@@ -30,6 +30,14 @@ const userSchema = new mongoose.Schema({
   lgpdConsent: {
     type: Boolean,
     required: [true, 'Consentimento LGPD é obrigatório']
+  },
+  dataConsentimento: {
+    type: Date,
+    default: Date.now
+  },
+  ultimoLogin: {
+    type: Date,
+    default: null
   }
 }, {
   timestamps: true

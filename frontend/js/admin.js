@@ -41,18 +41,12 @@ const switchSection = (section) => {
   }
 };
 
-// Check Auth
-const token = localStorage.getItem('token');
-if (!token) {
-  window.location.href = 'login.html';
-}
+axios.defaults.withCredentials = true;
 
-// Setup Axios Interceptor for Auth Header
 axios.interceptors.request.use(config => {
-  config.headers.Authorization = `Bearer ${token}`;
+  const token = localStorage.getItem('token');
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
-}, error => {
-  return Promise.reject(error);
 });
 
 axios.interceptors.response.use(response => response, error => {
@@ -177,9 +171,11 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-const logout = (e) => {
+const logout = async (e) => {
   e.preventDefault();
-  localStorage.removeItem('token');
+  try {
+    await axios.post(`${API_URL}/auth/logout`);
+  } catch (_) {}
   localStorage.removeItem('user');
   window.location.href = 'login.html';
 };
