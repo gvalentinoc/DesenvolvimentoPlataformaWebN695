@@ -50,7 +50,6 @@ const bookSchema = new mongoose.Schema({
   toObject: { virtuals: true }
 });
 
-// Virtual property to determine if the book is available
 bookSchema.virtual('disponivel').get(function() {
   return this.numeroExemplares > 0;
 });

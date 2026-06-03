@@ -3,20 +3,18 @@ let currentPage = 1;
 let currentFilters = {};
 let currentSearch = '';
 
-// Check Auth for Admin Button
 document.addEventListener('DOMContentLoaded', () => {
   const token = localStorage.getItem('token');
   if (token) {
     document.getElementById('adminBtn').classList.remove('d-none');
     document.getElementById('loginBtnNav').classList.add('d-none');
   }
-  
+
   setupEventListeners();
   fetchBooks();
 });
 
 const setupEventListeners = () => {
-  // Search Input
   let searchTimeout;
   document.getElementById('searchInput').addEventListener('input', (e) => {
     clearTimeout(searchTimeout);
@@ -27,30 +25,27 @@ const setupEventListeners = () => {
     }, 500);
   });
 
-  // Quick Filters
   document.querySelectorAll('#quickFilters .filter-chip').forEach(chip => {
     chip.addEventListener('click', (e) => {
       document.querySelectorAll('#quickFilters .filter-chip').forEach(c => c.classList.remove('active'));
       e.target.classList.add('active');
-      
+
       const filter = e.target.dataset.filter;
-      currentFilters = {}; // Reset advanced filters when using quick filters
-      
+      currentFilters = {};
+
       if (filter !== 'all') {
         const [key, value] = filter.split('=');
         currentFilters[key] = value;
       }
-      
+
       currentPage = 1;
       fetchBooks();
     });
   });
 
-  // Advanced Filters Toggle Logic
   const setupFilterGroup = (groupId) => {
     document.querySelectorAll(`#${groupId} .filter-chip`).forEach(chip => {
       chip.addEventListener('click', (e) => {
-        // Toggle active state
         e.target.classList.toggle('active');
       });
     });
@@ -60,8 +55,7 @@ const setupEventListeners = () => {
   setupFilterGroup('filterDisponibilidade');
   setupFilterGroup('filterPeriodo');
   setupFilterGroup('filterIdioma');
-  
-  // Order is single select
+
   document.querySelectorAll('#filterOrdem .filter-chip').forEach(chip => {
     chip.addEventListener('click', (e) => {
       document.querySelectorAll('#filterOrdem .filter-chip').forEach(c => c.classList.remove('active'));
@@ -69,34 +63,27 @@ const setupEventListeners = () => {
     });
   });
 
-  // Apply Filters Button
   document.getElementById('applyFiltersBtn').addEventListener('click', () => {
     currentFilters = {};
-    
-    // Gather Generos
+
     const generos = Array.from(document.querySelectorAll('#filterGenero .filter-chip.active')).map(c => c.dataset.value);
     if (generos.length > 0) currentFilters.genero = generos.join(',');
-    
-    // Gather Idiomas
+
     const idiomas = Array.from(document.querySelectorAll('#filterIdioma .filter-chip.active')).map(c => c.dataset.value);
     if (idiomas.length > 0) currentFilters.idioma = idiomas.join(',');
-    
-    // Gather Disponibilidade (taking the first active one for simplicity)
+
     const disp = document.querySelector('#filterDisponibilidade .filter-chip.active');
     if (disp) currentFilters.disponivel = disp.dataset.value;
-    
-    // Gather Ordem
+
     const ordem = document.querySelector('#filterOrdem .filter-chip.active');
     if (ordem) currentFilters.ordem = ordem.dataset.value;
-    
-    // Reset quick filters UI
+
     document.querySelectorAll('#quickFilters .filter-chip').forEach(c => c.classList.remove('active'));
-    
+
     currentPage = 1;
     fetchBooks();
   });
 
-  // Clear Filters Button
   document.getElementById('clearFiltersBtn').addEventListener('click', () => {
     document.querySelectorAll('#advancedFilters .filter-chip').forEach(c => c.classList.remove('active'));
     currentFilters = {};
@@ -116,28 +103,26 @@ const fetchBooks = async () => {
       </div>
     `;
 
-    // Build Query String
     const params = new URLSearchParams({
       pagina: currentPage,
       limite: 12
     });
-    
+
     if (currentSearch) params.append('busca', currentSearch);
-    
+
     Object.entries(currentFilters).forEach(([key, value]) => {
       params.append(key, value);
     });
 
     const response = await axios.get(`${API_URL}/books?${params.toString()}`);
     const { data, total, totalPages } = response.data;
-    
+
     renderBooks(data);
     renderPagination(totalPages);
-    
-    // Update counters
+
     document.getElementById('totalBooksText').textContent = `${total} livros encontrados`;
     document.getElementById('resultsCountBadge').textContent = `${total} resultados encontrados`;
-    
+
   } catch (error) {
     console.error('Erro ao buscar livros:', error);
     document.getElementById('booksGrid').innerHTML = `
@@ -151,7 +136,7 @@ const fetchBooks = async () => {
 
 const renderBooks = (books) => {
   const grid = document.getElementById('booksGrid');
-  
+
   if (books.length === 0) {
     grid.innerHTML = `
       <div class="col-12 text-center py-5 text-muted">
@@ -161,16 +146,15 @@ const renderBooks = (books) => {
     `;
     return;
   }
-  
-  // Array of colors for placeholder covers
+
   const colors = ['#3E2723', '#0B192C', '#1B3C28', '#2D1B2E', '#3E1F24'];
-  
+
   grid.innerHTML = books.map((book, index) => {
     const color = colors[index % colors.length];
-    const coverHtml = book.urlCapa 
+    const coverHtml = book.urlCapa
       ? `<img src="${book.urlCapa}" alt="Capa de ${book.titulo}" class="book-cover-img">`
       : `<div class="book-cover-placeholder" style="background-color: ${color};"><i class="bi bi-book"></i></div>`;
-      
+
     const statusBadge = book.disponivel
       ? `<span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 py-1 fw-normal"><i class="bi bi-check-circle me-1"></i> Disponível</span>`
       : `<span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-2 py-1 fw-normal"><i class="bi bi-clock me-1"></i> Emprestado</span>`;
@@ -197,12 +181,12 @@ const renderBooks = (books) => {
 
 const renderPagination = (totalPages) => {
   const pagination = document.getElementById('pagination');
-  
+
   if (totalPages <= 1) {
     pagination.innerHTML = '';
     return;
   }
-  
+
   let html = `
     <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
       <a class="page-link rounded-pill px-3 text-dark" href="#" data-page="${currentPage - 1}">
@@ -210,7 +194,7 @@ const renderPagination = (totalPages) => {
       </a>
     </li>
   `;
-  
+
   for (let i = 1; i <= totalPages; i++) {
     if (i === currentPage) {
       html += `<li class="page-item active"><span class="page-link rounded-circle bg-primary-custom border-primary-custom">${i}</span></li>`;
@@ -218,7 +202,7 @@ const renderPagination = (totalPages) => {
       html += `<li class="page-item"><a class="page-link rounded-circle text-dark border-0" href="#" data-page="${i}">${i}</a></li>`;
     }
   }
-  
+
   html += `
     <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
       <a class="page-link rounded-pill px-3 text-dark" href="#" data-page="${currentPage + 1}">
@@ -226,10 +210,9 @@ const renderPagination = (totalPages) => {
       </a>
     </li>
   `;
-  
+
   pagination.innerHTML = html;
-  
-  // Add event listeners to pagination links
+
   pagination.querySelectorAll('.page-link').forEach(link => {
     link.addEventListener('click', (e) => {
       e.preventDefault();

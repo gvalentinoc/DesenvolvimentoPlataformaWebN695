@@ -58,7 +58,6 @@ axios.interceptors.response.use(response => response, error => {
   return Promise.reject(error);
 });
 
-// Initialize Bootstrap Components
 document.addEventListener('DOMContentLoaded', () => {
   const userData = JSON.parse(localStorage.getItem('user'));
   if (!userData || userData.role !== 'admin') {
@@ -76,38 +75,33 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('userAvatar').textContent = initials;
     document.getElementById('dropdownUserName').textContent = `${userData.nome} ${userData.sobrenome}`;
   }
-  
-  // Navigation Logic (SPA)
+
   const navUsuarios = document.getElementById('navUsuarios');
   const navAcervo = document.getElementById('navAcervo');
   const navUsuariosMobile = document.getElementById('navUsuariosMobile');
   const navAcervoMobile = document.getElementById('navAcervoMobile');
-  
-  
+
+
   navUsuarios.addEventListener('click', (e) => { e.preventDefault(); switchSection('usuarios'); });
   navAcervo.addEventListener('click', (e) => { e.preventDefault(); switchSection('acervo'); });
   navUsuariosMobile.addEventListener('click', (e) => { e.preventDefault(); switchSection('usuarios'); });
   navAcervoMobile.addEventListener('click', (e) => { e.preventDefault(); switchSection('acervo'); });
-  
-  // Initial load
+
   fetchUsers();
-  
-  // Logout
+
   document.getElementById('logoutBtn').addEventListener('click', logout);
   document.getElementById('logoutBtnMobile').addEventListener('click', logout);
   document.getElementById('logoutBtnAvatar').addEventListener('click', logout);
-  
-  // Search
+
   document.getElementById('searchInput').addEventListener('input', (e) => {
     renderTable(e.target.value);
   });
-  
+
   document.getElementById('searchBookInput').addEventListener('input', () => {
     currentPage = 1;
     renderBooks();
   });
 
-  // View toggle
   document.getElementById('btnViewGrid').addEventListener('click', () => {
     bookViewMode = 'grid';
     document.getElementById('btnViewGrid').classList.add('active');
@@ -126,7 +120,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderBooks();
   });
 
-  // Filter buttons
   document.getElementById('bookFilters').addEventListener('click', (e) => {
     const btn = e.target.closest('.book-filter-btn');
     if (!btn) return;
@@ -136,14 +129,11 @@ document.addEventListener('DOMContentLoaded', () => {
     currentPage = 1;
     renderBooks();
   });
-  
-  // Form Submit
+
   document.getElementById('userForm').addEventListener('submit', handleUserSubmit);
-  
-  // Delete Confirm
+
   document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDelete);
-  
-  // Reset form on modal open for new user
+
   document.getElementById('btnNovoUsuario').addEventListener('click', () => {
     document.getElementById('userForm').reset();
     document.getElementById('userId').value = '';
@@ -153,8 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('modalAlert').classList.add('d-none');
     document.getElementById('userRole').value = 'leitor';
   });
-  
-  // --- Book Form Event Listeners ---
+
   document.getElementById('btnNovoLivro').addEventListener('click', () => {
     document.getElementById('bookForm').reset();
     document.getElementById('bookId').value = '';
@@ -164,11 +153,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('bookAlertMessage').classList.add('d-none');
     switchSection('adminLivro');
   });
-  
+
   document.getElementById('cancelBookBtn').addEventListener('click', () => {
     switchSection('acervo');
   });
-  
+
   document.getElementById('bookForm').addEventListener('submit', handleBookSubmit);
   document.getElementById('deleteBookBtn').addEventListener('click', () => {
     const id = document.getElementById('bookId').value;
@@ -214,10 +203,10 @@ const fetchUsers = async () => {
 
 const updateStats = () => {
   document.getElementById('statTotal').textContent = users.length;
-  
+
   const ativos = users.filter(u => u.status === 'Ativo').length;
   document.getElementById('statAtivos').textContent = ativos;
-  
+
   const today = new Date().setHours(0,0,0,0);
   const novos = users.filter(u => new Date(u.createdAt).setHours(0,0,0,0) === today).length;
   document.getElementById('statNovos').textContent = novos;
@@ -225,14 +214,14 @@ const updateStats = () => {
 
 const renderTable = (searchTerm = '') => {
   const tbody = document.getElementById('usersTableBody');
-  
+
   const filteredUsers = users.filter(user => {
     const term = searchTerm.toLowerCase();
-    return user.nome.toLowerCase().includes(term) || 
-           user.sobrenome.toLowerCase().includes(term) || 
+    return user.nome.toLowerCase().includes(term) ||
+           user.sobrenome.toLowerCase().includes(term) ||
            user.email.toLowerCase().includes(term);
   });
-  
+
   if (filteredUsers.length === 0) {
     tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">Nenhum usuário encontrado.</td></tr>`;
     return;
@@ -274,20 +263,19 @@ window.openEditModal = (id) => {
   document.getElementById('userEmail').value = user.email;
   document.getElementById('userStatus').value = user.status;
   document.getElementById('userRole').value = user.role || 'leitor';
-  
+
   document.getElementById('userSenha').required = false;
   document.getElementById('userSenha').value = '';
   document.getElementById('senhaHelp').classList.remove('d-none');
-  
+
   document.getElementById('userModalTitle').textContent = 'Editar usuário';
   document.getElementById('modalAlert').classList.add('d-none');
-  
+
   userModal.show();
 };
 
 window.openDeleteModal = (id, type = 'user') => {
   document.getElementById('deleteUserId').value = id;
-  // We use currentSection to determine what to delete, but if called from book form, we force it
   if (type === 'book') {
     currentSection = 'adminLivro';
   }
@@ -296,39 +284,36 @@ window.openDeleteModal = (id, type = 'user') => {
 
 const handleUserSubmit = async (e) => {
   e.preventDefault();
-  
+
   const id = document.getElementById('userId').value;
   const nome = document.getElementById('userNome').value;
   const sobrenome = document.getElementById('userSobrenome').value;
   const email = document.getElementById('userEmail').value;
   const senha = document.getElementById('userSenha').value;
   const status = document.getElementById('userStatus').value;
-  
+
   const btn = document.getElementById('saveUserBtn');
   const originalText = btn.textContent;
-  
+
   try {
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Salvando...';
-    
+
     const role = document.getElementById('userRole').value;
     const payload = { nome, sobrenome, email, status, role };
     if (senha) payload.senha = senha;
-    
+
     if (id) {
-      // Update
       await axios.put(`${API_URL}/users/${id}`, payload);
       showToast('Usuário atualizado com sucesso!');
     } else {
-      // Create
       await axios.post(`${API_URL}/users`, payload);
       showToast('Usuário criado com sucesso!');
     }
-    
+
     userModal.hide();
     fetchUsers();
   } catch (error) {
-    // Handle duplicate email error specifically
     if (error.response && error.response.status === 400 && error.response.data.message === 'Usuário já existe') {
       showModalAlert('Este e-mail já está cadastrado para outro usuário.');
     } else {
@@ -344,11 +329,11 @@ const confirmDelete = async () => {
   const id = document.getElementById('deleteUserId').value;
   const btn = document.getElementById('confirmDeleteBtn');
   const originalText = btn.textContent;
-  
+
   try {
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Excluindo...';
-    
+
     if (currentSection === 'usuarios') {
       await axios.delete(`${API_URL}/users/${id}`);
       showToast('Usuário excluído com sucesso!');
@@ -362,7 +347,7 @@ const confirmDelete = async () => {
         fetchAdminBooks();
       }
     }
-    
+
     deleteModal.hide();
   } catch (error) {
     console.error('Erro ao excluir:', error);
@@ -372,8 +357,6 @@ const confirmDelete = async () => {
     btn.textContent = originalText;
   }
 };
-
-// --- Books Logic for Admin Panel ---
 
 const fetchAdminBooks = async () => {
   try {
@@ -571,11 +554,11 @@ window.openEditBook = (id) => {
 
 const handleBookSubmit = async (e) => {
   e.preventDefault();
-  
+
   const id = document.getElementById('bookId').value;
   const btn = document.getElementById('saveBookBtn');
   const originalText = btn.innerHTML;
-  
+
   const payload = {
     titulo: document.getElementById('titulo').value,
     autor: document.getElementById('autor').value,
@@ -588,9 +571,9 @@ const handleBookSubmit = async (e) => {
     sinopse: document.getElementById('sinopse').value,
     urlCapa: document.getElementById('urlCapa').value
   };
-  
+
   const alertEl = document.getElementById('bookAlertMessage');
-  
+
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Salvando...';
 

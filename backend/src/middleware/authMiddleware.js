@@ -4,7 +4,6 @@ const User = require('../models/User');
 const protect = async (req, res, next) => {
   let token = req.cookies?.token;
 
-  // mantém suporte ao header Authorization para compatibilidade
   if (!token && req.headers.authorization?.startsWith('Bearer')) {
     token = req.headers.authorization.split(' ')[1];
   }

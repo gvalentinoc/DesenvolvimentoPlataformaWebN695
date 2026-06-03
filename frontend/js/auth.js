@@ -2,7 +2,6 @@ const API_URL = window.location.hostname === 'localhost' || window.location.host
   ? 'http://localhost:3000/api'
   : 'https://desenvolvimentoplataformawebn695-production.up.railway.app/api';
 
-// Toggle Password Visibility
 const togglePassword = document.querySelector('#togglePassword');
 const password = document.querySelector('#senha');
 
@@ -36,7 +35,6 @@ const showAlert = (message, type) => {
   }
 };
 
-// Login Form Submit
 const loginForm = document.getElementById('loginForm');
 if (loginForm) {
   loginForm.addEventListener('submit', async (e) => {
@@ -64,7 +62,6 @@ if (loginForm) {
   });
 }
 
-// Register Form Submit
 const registerForm = document.getElementById('registerForm');
 if (registerForm) {
   registerForm.addEventListener('submit', async (e) => {

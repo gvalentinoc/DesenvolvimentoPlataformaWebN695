@@ -26,7 +26,6 @@ let books = [];
 let bookDetailModal;
 let viewMode = 'grid';
 
-// Advanced filter state
 const advFilters = { genero: null, disponibilidade: null, periodo: null, idioma: null, ordem: null };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -48,19 +47,16 @@ document.addEventListener('DOMContentLoaded', () => {
     switchSection(pendingSection);
   }
 
-  // Avatar
   if (userData.nome && userData.sobrenome) {
     const initials = `${userData.nome.charAt(0)}${userData.sobrenome.charAt(0)}`.toUpperCase();
     document.getElementById('userAvatar').textContent = initials;
     document.getElementById('dropdownUserName').textContent = `${userData.nome} ${userData.sobrenome}`;
   }
 
-  // Navigation
   document.getElementById('navAcervo').addEventListener('click', (e) => { e.preventDefault(); switchSection('acervo'); });
   document.getElementById('navMinhaConta').addEventListener('click', (e) => { e.preventDefault(); switchSection('conta'); });
   document.getElementById('btnSair').addEventListener('click', logout);
 
-  // View toggle
   document.getElementById('btnGrid').addEventListener('change', () => {
     viewMode = 'grid';
     renderBooks(books);
@@ -70,14 +66,12 @@ document.addEventListener('DOMContentLoaded', () => {
     renderBooks(books);
   });
 
-  // Search
   document.getElementById('searchInput').addEventListener('input', (e) => {
     currentSearch = e.target.value;
     currentPage = 1;
     fetchBooks();
   });
 
-  // Quick filter chips
   document.querySelectorAll('#quickFilters .filter-chip').forEach(chip => {
     chip.addEventListener('click', (e) => {
       document.querySelectorAll('#quickFilters .filter-chip').forEach(c => c.classList.remove('active'));
@@ -95,7 +89,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Advanced filter chips (single-select per group)
   ['filterGenero', 'filterDisponibilidade', 'filterPeriodo', 'filterIdioma', 'filterOrdem'].forEach(groupId => {
     document.getElementById(groupId).addEventListener('click', (e) => {
       const chip = e.target.closest('.filter-chip');
@@ -106,7 +99,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Apply filters button
   document.getElementById('applyFiltersBtn').addEventListener('click', () => {
     currentFilters = {};
     document.querySelectorAll('#quickFilters .filter-chip').forEach(c => c.classList.remove('active'));
@@ -131,7 +123,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('resultsCountBadge').textContent = `${count} filtro${count !== 1 ? 's' : ''} aplicado${count !== 1 ? 's' : ''}`;
   });
 
-  // Clear filters button
   document.getElementById('clearFiltersBtn').addEventListener('click', () => {
     currentFilters = {};
     clearAdvFilterUI();
