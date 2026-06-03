@@ -41,6 +41,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
   bookDetailModal = new bootstrap.Modal(document.getElementById('bookDetailModal'));
 
+  if (userData.lgpdConsent === false) {
+    const modalConsent = new bootstrap.Modal(document.getElementById('modalConsentimento'));
+    modalConsent.show();
+
+    document.getElementById('btnAceitarConsentimento').addEventListener('click', async () => {
+      const check = document.getElementById('checkConsentimento');
+      if (!check.checked) {
+        document.getElementById('consentAlerta').classList.remove('d-none');
+        return;
+      }
+      document.getElementById('consentAlerta').classList.add('d-none');
+      const btn = document.getElementById('btnAceitarConsentimento');
+      btn.disabled = true;
+      btn.textContent = 'Salvando...';
+      try {
+        await axios.patch(`${API_URL}/auth/me/accept-consent`);
+        userData.lgpdConsent = true;
+        localStorage.setItem('user', JSON.stringify(userData));
+        modalConsent.hide();
+        initPage(userData);
+      } catch {
+        btn.disabled = false;
+        btn.textContent = 'Aceitar e continuar';
+        alert('Erro ao registrar consentimento. Tente novamente.');
+      }
+    });
+    return;
+  }
+
+  initPage(userData);
+});
+
+const initPage = (userData) => {
   const pendingSection = sessionStorage.getItem('leitorSection');
   if (pendingSection) {
     sessionStorage.removeItem('leitorSection');
@@ -56,6 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('navAcervo').addEventListener('click', (e) => { e.preventDefault(); switchSection('acervo'); });
   document.getElementById('navMinhaConta').addEventListener('click', (e) => { e.preventDefault(); switchSection('conta'); });
   document.getElementById('btnSair').addEventListener('click', logout);
+
 
   document.getElementById('btnGrid').addEventListener('change', () => {
     viewMode = 'grid';
@@ -134,7 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   fetchBooks();
-});
+};
 
 const clearAdvFilterUI = () => {
   ['filterGenero', 'filterDisponibilidade', 'filterPeriodo', 'filterIdioma', 'filterOrdem'].forEach(id => {
@@ -293,6 +327,9 @@ window.openBookDetail = (id) => {
   bookDetailModal.show();
 };
 
+let modalRevogar;
+let modalExcluir;
+
 const fetchMinhaConta = async () => {
   document.getElementById('contaLoading').classList.remove('d-none');
   document.getElementById('contaInfo').classList.add('d-none');
@@ -307,9 +344,95 @@ const fetchMinhaConta = async () => {
     document.getElementById('contaConsent').textContent = u.dataConsentimento
       ? new Date(u.dataConsentimento).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
       : 'Não registrado';
+    document.getElementById('contaUltimoLogin').textContent = u.ultimoLogin
+      ? new Date(u.ultimoLogin).toLocaleString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+      : 'Nunca registrado';
+
+    document.getElementById('editNome').value = u.nome;
+    document.getElementById('editSobrenome').value = u.sobrenome;
+    document.getElementById('editEmail').value = u.email;
+
+    if (!modalRevogar) modalRevogar = new bootstrap.Modal(document.getElementById('modalRevogarConsentimento'));
+    if (!modalExcluir) modalExcluir = new bootstrap.Modal(document.getElementById('modalExcluirConta'));
+
     document.getElementById('contaLoading').classList.add('d-none');
     document.getElementById('contaInfo').classList.remove('d-none');
+
+    setupContaHandlers();
   } catch {
     document.getElementById('contaLoading').innerHTML = '<p class="text-danger small">Erro ao carregar dados da conta.</p>';
   }
+};
+
+const setupContaHandlers = () => {
+  document.getElementById('btnEditarDados').onclick = () => {
+    document.getElementById('formEditarDados').classList.toggle('d-none');
+    document.getElementById('editSenha').value = '';
+    document.getElementById('editAlerta').classList.add('d-none');
+  };
+  document.getElementById('btnCancelarEdicao').onclick = () => {
+    document.getElementById('formEditarDados').classList.add('d-none');
+  };
+
+  // Art. 18, III — salvar dados
+  document.getElementById('btnSalvarDados').onclick = async () => {
+    const btn = document.getElementById('btnSalvarDados');
+    const alerta = document.getElementById('editAlerta');
+    const payload = {};
+    const nome = document.getElementById('editNome').value.trim();
+    const sobrenome = document.getElementById('editSobrenome').value.trim();
+    const email = document.getElementById('editEmail').value.trim();
+    const senha = document.getElementById('editSenha').value;
+    if (nome) payload.nome = nome;
+    if (sobrenome) payload.sobrenome = sobrenome;
+    if (email) payload.email = email;
+    if (senha) payload.senha = senha;
+
+    try {
+      btn.disabled = true;
+      btn.textContent = 'Salvando...';
+      await axios.put(`${API_URL}/auth/me`, payload);
+      alerta.className = 'alert alert-success small py-2';
+      alerta.textContent = 'Dados atualizados com sucesso.';
+      alerta.classList.remove('d-none');
+      fetchMinhaConta();
+    } catch (err) {
+      alerta.className = 'alert alert-danger small py-2';
+      alerta.textContent = err.response?.data?.message || 'Erro ao salvar dados.';
+      alerta.classList.remove('d-none');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Salvar';
+    }
+  };
+
+  // Art. 8, §5º — revogar consentimento
+  document.getElementById('btnRevogarConsentimento').onclick = () => modalRevogar.show();
+  document.getElementById('btnConfirmarRevogacao').onclick = async () => {
+    try {
+      await axios.patch(`${API_URL}/auth/me/revoke-consent`);
+      modalRevogar.hide();
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      window.location.href = 'login.html';
+    } catch {
+      modalRevogar.hide();
+      alert('Erro ao revogar consentimento. Tente novamente.');
+    }
+  };
+
+  // Art. 18, VI — excluir conta
+  document.getElementById('btnExcluirConta').onclick = () => modalExcluir.show();
+  document.getElementById('btnConfirmarExclusao').onclick = async () => {
+    try {
+      await axios.delete(`${API_URL}/auth/me`);
+      modalExcluir.hide();
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      window.location.href = 'login.html';
+    } catch {
+      modalExcluir.hide();
+      alert('Erro ao excluir conta. Tente novamente.');
+    }
+  };
 };

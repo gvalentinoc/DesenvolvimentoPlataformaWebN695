@@ -7,15 +7,15 @@ const {
   updateBook,
   deleteBook
 } = require('../controllers/bookController');
-const { protect } = require('../middleware/authMiddleware');
+const { protect, adminOnly } = require('../middleware/authMiddleware');
 
 router.route('/')
   .get(getBooks)
-  .post(protect, createBook);
+  .post(protect, adminOnly, createBook);
 
 router.route('/:id')
   .get(getBookById)
-  .put(protect, updateBook)
-  .delete(protect, deleteBook);
+  .put(protect, adminOnly, updateBook)
+  .delete(protect, adminOnly, deleteBook);
 
 module.exports = router;

@@ -170,6 +170,8 @@
           <div class="spinner-border spinner-border-sm text-primary-custom" role="status"></div>
         </div>
         <div id="contaInfo" class="d-none">
+
+          <!-- Cabeçalho com avatar -->
           <div class="d-flex align-items-center gap-3 mb-4">
             <div class="rounded-circle bg-primary-custom text-white d-flex align-items-center justify-content-center fw-bold fs-4"
                  style="width:56px;height:56px;" id="contaAvatar"></div>
@@ -179,7 +181,9 @@
             </div>
           </div>
           <hr>
-          <div class="row g-3 small">
+
+          <!-- Dados -->
+          <div class="row g-3 small mb-3">
             <div class="col-6">
               <div class="text-muted">Perfil</div>
               <div class="fw-semibold text-dark" id="contaRole"></div>
@@ -192,20 +196,146 @@
               <div class="text-muted">Consentimento LGPD registrado em</div>
               <div class="fw-semibold text-dark" id="contaConsent"></div>
             </div>
+            <div class="col-12">
+              <div class="text-muted">Último acesso <span class="text-muted fw-normal" style="font-size:11px;">(registrado para segurança da conta)</span></div>
+              <div class="fw-semibold text-dark" id="contaUltimoLogin"></div>
+            </div>
           </div>
+
+          <!-- Botão editar dados -->
+          <button class="btn btn-outline-primary-custom btn-sm w-100 mb-2" id="btnEditarDados">
+            <i class="bi bi-pencil me-1"></i> Editar meus dados
+          </button>
+
+          <!-- Formulário de edição (oculto por padrão) -->
+          <div id="formEditarDados" class="d-none mt-3 mb-2">
+            <div id="editAlerta" class="d-none"></div>
+            <div class="mb-2">
+              <label class="form-label small fw-semibold">Nome</label>
+              <input type="text" class="form-control form-control-sm" id="editNome">
+            </div>
+            <div class="mb-2">
+              <label class="form-label small fw-semibold">Sobrenome</label>
+              <input type="text" class="form-control form-control-sm" id="editSobrenome">
+            </div>
+            <div class="mb-2">
+              <label class="form-label small fw-semibold">E-mail</label>
+              <input type="email" class="form-control form-control-sm" id="editEmail">
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Nova senha <span class="text-muted fw-normal">(deixe em branco para não alterar)</span></label>
+              <input type="password" class="form-control form-control-sm" id="editSenha" placeholder="Mínimo 8 caracteres">
+            </div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-primary-custom btn-sm flex-grow-1" id="btnSalvarDados">Salvar</button>
+              <button class="btn btn-outline-secondary btn-sm" id="btnCancelarEdicao">Cancelar</button>
+            </div>
+          </div>
+
           <hr>
-          <p class="small text-muted mb-3">
-            Para exercer seus direitos previstos na LGPD (acesso, correção ou exclusão de dados),
-            entre em contato: <a href="mailto:privacidade@biblioteca.exemplo.br" class="text-primary-custom">privacidade@biblioteca.exemplo.br</a>
-          </p>
-          <a href="politica-privacidade.html" class="btn btn-outline-secondary btn-sm w-100"
-             onclick="sessionStorage.setItem('leitorSection','conta')">
-            <i class="bi bi-shield-check me-1"></i> Ver Política de Privacidade
-          </a>
+
+          <!-- Direitos LGPD -->
+          <p class="small fw-semibold text-dark mb-2">Seus direitos (LGPD)</p>
+          <div class="d-grid gap-2">
+            <a href="politica-privacidade.html" class="btn btn-outline-secondary btn-sm"
+               onclick="sessionStorage.setItem('leitorSection','conta')">
+              <i class="bi bi-shield-check me-1"></i> Ver Política de Privacidade
+            </a>
+            <button class="btn btn-outline-warning btn-sm" id="btnRevogarConsentimento">
+              <i class="bi bi-slash-circle me-1"></i> Revogar consentimento
+            </button>
+            <button class="btn btn-outline-danger btn-sm" id="btnExcluirConta">
+              <i class="bi bi-trash me-1"></i> Excluir minha conta
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
+  </div>
+
+  <!-- Modal: Consentimento no primeiro login (bloqueante) -->
+  <div class="modal fade" id="modalConsentimento" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width:520px;">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="modal-title fw-bold text-dark">
+            <i class="bi bi-shield-lock me-2 text-primary-custom"></i>Consentimento de uso de dados
+          </h5>
+        </div>
+        <div class="modal-body pt-2">
+          <p class="text-muted small mb-3">
+            Sua conta foi criada por um administrador. Antes de continuar, você precisa consentir com o uso dos seus dados pessoais conforme a <strong>Lei Geral de Proteção de Dados (LGPD – Lei 13.709/2018)</strong>.
+          </p>
+          <div class="bg-light rounded-2 p-3 small mb-3" style="max-height:200px;overflow-y:auto;">
+            <p class="fw-semibold mb-2">O que coletamos e por quê:</p>
+            <ul class="mb-2 ps-3">
+              <li><strong>Nome e e-mail</strong> — para identificação e comunicação.</li>
+              <li><strong>Data de acesso</strong> — para segurança e auditoria.</li>
+            </ul>
+            <p class="fw-semibold mb-2">Seus direitos (Art. 18, LGPD):</p>
+            <ul class="mb-0 ps-3">
+              <li>Acessar, corrigir ou excluir seus dados a qualquer momento.</li>
+              <li>Revogar este consentimento — seus dados serão removidos em até 30 dias.</li>
+            </ul>
+          </div>
+          <div class="form-check mb-1">
+            <input class="form-check-input" type="checkbox" id="checkConsentimento">
+            <label class="form-check-label small" for="checkConsentimento">
+              Li e concordo com o <a href="politica-privacidade.html" target="_blank" class="text-primary-custom">tratamento dos meus dados pessoais</a> conforme descrito acima.
+            </label>
+          </div>
+          <div id="consentAlerta" class="d-none mt-2 text-danger small">
+            <i class="bi bi-exclamation-circle me-1"></i>Você precisa marcar a caixa para continuar.
+          </div>
+        </div>
+        <div class="modal-footer border-0 pt-0 gap-2">
+          <a href="login.html" id="btnRecusarConsentimento" class="btn btn-outline-secondary btn-sm"
+             onclick="localStorage.removeItem('user');localStorage.removeItem('token');">
+            Recusar e sair
+          </a>
+          <button class="btn btn-primary-custom btn-sm flex-grow-1" id="btnAceitarConsentimento">
+            Aceitar e continuar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Revogar Consentimento -->
+  <div class="modal fade" id="modalRevogarConsentimento" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-body p-4">
+          <h5 class="fw-bold text-dark mb-2">Revogar consentimento LGPD</h5>
+          <p class="text-muted small mb-4">
+            Ao revogar, seu consentimento será cancelado e seus dados serão removidos em até 30 dias conforme o Art. 8, §5º da LGPD. Você será desconectado.
+          </p>
+          <div class="d-flex gap-2">
+            <button class="btn btn-warning btn-sm flex-grow-1" id="btnConfirmarRevogacao">Sim, revogar</button>
+            <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Excluir Conta -->
+  <div class="modal fade" id="modalExcluirConta" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width:420px;">
+      <div class="modal-content border-0 shadow">
+        <div class="modal-body p-4">
+          <h5 class="fw-bold text-danger mb-2">Excluir minha conta</h5>
+          <p class="text-muted small mb-4">
+            Esta ação é irreversível. Todos os seus dados serão apagados permanentemente conforme o Art. 18, VI da LGPD.
+          </p>
+          <div class="d-flex gap-2">
+            <button class="btn btn-danger btn-sm flex-grow-1" id="btnConfirmarExclusao">Sim, excluir minha conta</button>
+            <button class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Book Detail Modal -->

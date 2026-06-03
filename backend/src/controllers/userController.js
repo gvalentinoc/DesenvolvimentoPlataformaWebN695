@@ -14,16 +14,16 @@ const getUsers = async (req, res) => {
 
 const createUser = async (req, res) => {
   try {
-    const { nome, sobrenome, email, senha, status, lgpdConsent } = req.body;
+    const { nome, sobrenome, email, senha, status, role } = req.body;
     const userExists = await User.findOne({ email });
     if (userExists) return res.status(400).json({ message: 'Usuário já existe' });
 
-    const { role } = req.body;
     const user = await User.create({
       nome, sobrenome, email, senha,
       role: role || 'leitor',
       status: status || 'Ativo',
-      lgpdConsent: lgpdConsent !== undefined ? lgpdConsent : true,
+      lgpdConsent: false,
+      dataConsentimento: null,
     });
 
     if (user) {

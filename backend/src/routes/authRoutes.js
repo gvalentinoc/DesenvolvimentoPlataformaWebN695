@@ -1,7 +1,7 @@
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 const router = express.Router();
-const { register, login, logout, me } = require('../controllers/authController');
+const { register, login, logout, me, acceptConsent, updateMe, deleteMe, revokeConsent } = require('../controllers/authController');
 const { protect } = require('../middleware/authMiddleware');
 
 const authLimiter = rateLimit({
@@ -16,5 +16,9 @@ router.post('/register', authLimiter, register);
 router.post('/login', authLimiter, login);
 router.post('/logout', logout);
 router.get('/me', protect, me);
+router.patch('/me/accept-consent', protect, acceptConsent);
+router.put('/me', protect, updateMe);
+router.delete('/me', protect, deleteMe);
+router.patch('/me/revoke-consent', protect, revokeConsent);
 
 module.exports = router;

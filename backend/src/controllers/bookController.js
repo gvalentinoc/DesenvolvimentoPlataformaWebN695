@@ -75,14 +75,22 @@ const getBookById = async (req, res) => {
   }
 };
 
+const BOOK_FIELDS = ['titulo', 'autor', 'isbn', 'genero', 'anoPublicacao', 'numeroExemplares', 'idioma', 'paginas', 'sinopse', 'urlCapa'];
+
+const pickBookFields = (body) => BOOK_FIELDS.reduce((acc, key) => {
+  if (body[key] !== undefined) acc[key] = body[key];
+  return acc;
+}, {});
+
 const createBook = async (req, res) => {
   try {
-    const bookExists = await Book.findOne({ isbn: req.body.isbn });
+    const data = pickBookFields(req.body);
+    const bookExists = await Book.findOne({ isbn: data.isbn });
     if (bookExists) {
       return res.status(400).json({ message: 'Um livro com este ISBN já existe' });
     }
 
-    const book = await Book.create(req.body);
+    const book = await Book.create(data);
     await audit('livro-criado', req.user?._id, book._id.toString(), { titulo: book.titulo });
     res.status(201).json(book);
   } catch (error) {
@@ -106,7 +114,7 @@ const updateBook = async (req, res) => {
       }
     }
 
-    book = await Book.findByIdAndUpdate(req.params.id, req.body, {
+    book = await Book.findByIdAndUpdate(req.params.id, pickBookFields(req.body), {
       new: true,
       runValidators: true
     });

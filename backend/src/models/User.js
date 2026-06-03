@@ -38,8 +38,19 @@ const userSchema = new mongoose.Schema({
   },
   dataConsentimento: {
     type: Date,
-    default: Date.now
+    default: null
   },
+  consentVersion: {
+    type: String,
+    default: null,
+  },
+  consentHistory: [
+    {
+      version: String,
+      acceptedAt: Date,
+      revokedAt: { type: Date, default: null },
+    }
+  ],
   ultimoLogin: {
     type: Date,
     default: null
